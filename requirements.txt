@@ -1,0 +1,5 @@
+PyYAML==6.0.3
+streamlit==1.61.0
+pydeck==0.9.3
+azure-eventhub==5.15.1
+azure-identity==1.25.3
