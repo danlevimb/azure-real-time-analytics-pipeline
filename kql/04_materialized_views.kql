@@ -1,0 +1,36 @@
+.create-or-alter materialized-view 
+with (
+    docString = "One canonical telemetry row per logical event_id", 
+    folder = "Silver/Canonical") 
+TelemetryCanonical on table TelemetryParsed {
+    TelemetryParsed
+    | summarize take_any(*) by event_id
+}
+
+.create-or-alter materialized-view 
+with (
+    docString = "One canonical state transition per logical event_id", 
+    folder = "Silver/Canonical") 
+StateTransitionsCanonical on table StateTransitionsParsed {
+    StateTransitionsParsed
+    | summarize take_any(*) by event_id
+}
+
+.create-or-alter materialized-view 
+with (
+    docstring = "One canonical maintenance event per logical event_id", 
+    folder = "Silver/Canonical") 
+MaintenanceEventsCanonical on table MaintenanceEventsParsed {
+    MaintenanceEventsParsed
+    | summarize take_any(*) by event_id 
+}
+
+.create-or-alter materialized-view 
+with (
+    docString = "One canonical status confirmation per logical event_id", 
+    folder = "Silver/Canonical") 
+StatusConfirmationsCanonical on table StatusConfirmationsParsed {
+    StatusConfirmationsParsed
+    | summarize take_any(*) by event_id
+}
+

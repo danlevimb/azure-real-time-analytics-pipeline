@@ -1,0 +1,25 @@
+.create-or-alter function 
+with (
+    folder = "Silver/Performance", 
+    docstring = "Summarizes scale and performance metrics for a specified simulator run", 
+    skipvalidation = "true") 
+ScaleValidationReport(p_RunId:string) {
+    let RawRun = RawDroneEvents | where tostring(simulation.simulator_run_id) == p_RunId;
+    let PhysicalRows = toscalar(RawRun | count);
+    let UniqueEventIds = toscalar (RawRun | summarize by event_id | count);
+    let DroneSeen = toscalar (RawRun | summarize by drone_id | count);
+    let TimeStats = RawRun | summarize FirstEhTime = min(eh_enqueued_time), LastEhTime = max(eh_enqueued_time);
+    let FirstEhTime = toscalar (TimeStats | project FirstEhTime);
+    let LastEhTime = toscalar (TimeStats  | project LastEhTime);
+    let ObservedDurationSec = todouble(datetime_diff("millisecond", LastEhTime, FirstEhTime)) / 1000.0;
+    let AvgIngressEventsPerSec = iif(ObservedDurationSec  > 0, round(todouble(PhysicalRows) / ObservedDurationSec, 2), real(null));
+    print 
+        RunId = p_RunId,
+        DroneSeen = DroneSeen, 
+        PhysicalRows = PhysicalRows,
+        UniqueEventIds = UniqueEventIds,
+        FirstEhTime = FirstEhTime,
+        LastEhTime = LastEhTime,
+        ObservedDurationSec = ObservedDurationSec,
+        AvgIngressEventPerSec = AvgIngressEventsPerSec
+}

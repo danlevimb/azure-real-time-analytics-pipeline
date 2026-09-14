@@ -1,0 +1,119 @@
+.create-or-alter function 
+with (
+    folder = "Silver/Transforms", 
+    docstring = "Parse Event Contract v1 telemetry events from RawDroneEvents", 
+    skipvalidation = "true")    
+TransformTelemetry() {
+    RawDroneEvents
+    | where event_type == "telemetry"
+    | project
+        schema_version          = tostring(schema_version),
+        event_id                = tostring(event_id),
+        event_time              = event_time,
+        drone_id                = tostring(drone_id),
+        battalion_id            = tostring(battalion_id),
+        mission_id              = tostring(mission_id),
+        source_sequence_number  = tolong(source_sequence_number),
+        source_type             = tostring(source_type),
+        source_gateway_id       = tostring(source_gateway_id),
+        simulator_run_id        = tostring(simulation.simulator_run_id),
+        scenario                = tostring(simulation.scenario),
+        seed                    = tolong(simulation.seed),
+        latitude                = todouble(payload.position.latitude),
+        longitude               = todouble(payload.position.longitude),
+        altitude_m              = todouble(payload.position.altitude_m),
+        ground_speed_mps        = todouble(payload.movement.ground_speed_mps),
+        vertical_speed_mps      = todouble(payload.movement.vertical_speed_mps),
+        heading_deg             = todouble(payload.movement.heading_deg),
+        battery_pct             = todouble(payload.power.battery_pct),
+        platform_health         = tostring(payload.health.platform_health),
+        connection_state        = tostring(payload.communications.connection_state),
+        asset_state             = tostring(payload.operations.asset_state),
+        mission_status          = tostring(payload.operations.mission_status),
+        mission_phase           = tostring(payload.operations.mission_phase),
+        bronze_ingested_at      = ingestion_time()
+}
+
+.create-or-alter function 
+with (
+    folder = "Silver/Transforms", 
+    docstring = "Parse state transition events from RawDroneEvents", 
+    skipvalidation = "true") 
+TransformStateTransitions() {
+    RawDroneEvents
+    | where event_type == "state_transition"
+    | project
+        schema_version          = tostring(schema_version),
+        event_id                = tostring(event_id),
+        event_time              = event_time,
+        drone_id                = tostring(drone_id),
+        battalion_id            = tostring(battalion_id),
+        mission_id              = tostring(mission_id),
+        source_sequence_number  = tolong(source_sequence_number),
+        source_type             = tostring(source_type),
+        source_gateway_id       = tostring(source_gateway_id),
+        simulator_run_id        = tostring(simulation.simulator_run_id),
+        scenario                = tostring(simulation.scenario),
+        seed                    = tolong(simulation.seed),
+        state_domain            = tostring(payload.state_domain),
+        previous_state          = tostring(payload.previous_state),
+        new_state               = tostring(payload.new_state),
+        reason_code             = tostring(payload.reason_code),
+        bronze_ingested_at      = ingestion_time()
+}
+
+.create-or-alter function 
+with (
+    folder = "Silver/Transforms", 
+    docstring = "Transforms maintenance events from RawDroneEvents", 
+    skipvalidation = "true") 
+TransformMaintenanceEvents() {
+    RawDroneEvents
+    | where event_type  == "maintenance_event"
+    | project 
+        schema_version          = tostring(schema_version),
+        event_id                = tostring(event_id),
+        event_time              = event_time,
+        drone_id                = tostring(drone_id),
+        batallion_id            = tostring(battalion_id),
+        mission_id              = tostring(mission_id),
+        source_sequence_number  = tolong(source_sequence_number),
+        source_type             = tostring(source_type),
+        source_gateway_id       = tostring(source_gateway_id),
+        simulator_run_id        = tostring(simulation.simulator_run_id),
+        scenario                = tostring(simulation.scenario),
+        seed                    = tolong(simulation.seed),
+        reason_code             = tostring(payload.reason_code),
+        maintenance_action      = tostring(payload.maintenance_action),
+        maintenance_category    = tostring(payload.maintenance_category),
+        severity                = tostring(payload.severity),
+        bronze_ingested_at      = ingestion_time()
+}
+
+.create-or-alter function 
+with (
+    folder = "Silver/Transforms", 
+    docstring = "Parse statu confirmation events from RawDroneEvents", 
+    skipvalidation = "true") 
+TransformStatusConfirmations() {
+    RawDroneEvents
+    | where event_type == "status_confirmation"
+    | project
+        schema_version          = tostring(schema_version),
+        event_id                = tostring(event_id),
+        event_time              = event_time,
+        drone_id                = tostring(drone_id),
+        battalion_id            = tostring(battalion_id),
+        mission_id              = tostring(mission_id),
+        source_sequence_number  = tolong(source_sequence_number),
+        source_type             = tostring(source_type),
+        source_gateway_id       = tostring(source_gateway_id),
+        simulator_run_id        = tostring(simulation.simulator_run_id),
+        scenario                = tostring(simulation.scenario),
+        seed                    = tolong(simulation.seed),
+        state_domain            = tostring(payload.state_domain),
+        reason_code             = tostring(payload.reason_code),
+        confirmed_state         = tostring(payload.confirmed_state),
+        confirmation_type       = tostring(payload.confirmation_type),
+        bronze_ingested_at      = ingestion_time()
+}

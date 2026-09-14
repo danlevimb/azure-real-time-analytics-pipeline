@@ -1,0 +1,133 @@
+.create-or-alter function 
+with (
+    folder = "Gold/State", 
+    docstring = "Normalize canonical state assertions into a common evidence model", 
+    skipvalidation = "true") 
+StateEvidence(p_RunId:string) {
+    union
+    (
+        StatusConfirmationsCanonical
+        | where simulator_run_id == p_RunId
+        | project
+            simulator_run_id, drone_id, battalion_id, mission_id, event_time, source_sequence_number,
+            state_domain = tostring(state_domain), state_value = tostring(confirmed_state), evidence_type = "status_confirmation",
+            evidence_rank = 300, evidence_event_id = event_id, reason_code, bronze_ingested_at
+    ),
+    (
+        StateTransitionsCanonical
+        | where simulator_run_id == p_RunId
+        | project
+            simulator_run_id, drone_id, battalion_id, mission_id, event_time, source_sequence_number,
+            state_domain = tostring(state_domain), state_value = tostring(new_state), evidence_type = "state_transition",
+            evidence_rank = 200, evidence_event_id = event_id, reason_code, bronze_ingested_at
+    ),
+    (
+        TelemetryCanonical
+        | where simulator_run_id == p_RunId
+        | project
+            simulator_run_id, drone_id, battalion_id, mission_id, event_time, source_sequence_number,
+            state_domain = "asset_state", state_value = tostring(asset_state), evidence_type = "telemetry",
+            evidence_rank = 100, evidence_event_id = event_id, reason_code = "", bronze_ingested_at
+    ),
+    (
+        TelemetryCanonical
+        | where simulator_run_id == p_RunId
+        | project
+            simulator_run_id, drone_id, battalion_id, mission_id, event_time, source_sequence_number, 
+            state_domain = "mission_status", state_value = tostring(mission_status), evidence_type = "telemetry",
+            evidence_rank = 100, evidence_event_id = event_id, reason_code = "", bronze_ingested_at
+    ),
+    (
+        TelemetryCanonical
+        | where simulator_run_id == p_RunId
+        | project
+            simulator_run_id, drone_id, battalion_id, mission_id, event_time, source_sequence_number,
+            state_domain = "mission_phase", state_value = tostring(mission_phase), evidence_type = "telemetry",       
+            evidence_rank = 100, evidence_event_id = event_id, reason_code = "", bronze_ingested_at
+    ),
+    (
+        TelemetryCanonical
+        | where simulator_run_id == p_RunId
+        | project
+            simulator_run_id, drone_id, battalion_id, mission_id, event_time, source_sequence_number,            
+            state_domain = "connection_state", state_value = tostring(connection_state), evidence_type = "telemetry",
+            evidence_rank = 100, evidence_event_id = event_id, reason_code = "", bronze_ingested_at
+    ),
+    (
+        TelemetryCanonical
+        | where simulator_run_id == p_RunId
+        | project
+            simulator_run_id, drone_id, battalion_id, mission_id, event_time, source_sequence_number,
+            state_domain = "platform_health", state_value = tostring(platform_health), evidence_type = "telemetry",
+            evidence_rank = 100, evidence_event_id = event_id, reason_code = "", bronze_ingested_at
+    ),
+    (
+        StateTransitionsCanonical
+        | where simulator_run_id == p_RunId and state_domain == "mission_phase" and new_state == "LANDED"
+        | project
+            simulator_run_id, drone_id, battalion_id, mission_id, event_time, source_sequence_number,
+            state_domain = "mission_status", state_value = "COMPLETED", evidence_type = "inference", 
+            evidence_rank = 10, evidence_event_id = event_id, reason_code = "INFERRED_FROM_LANDED", bronze_ingested_at
+    ),
+    (
+        StateTransitionsCanonical
+        | where simulator_run_id == p_RunId and state_domain == "mission_phase" and new_state == "LANDED"
+        | project
+            simulator_run_id, drone_id, battalion_id, mission_id, event_time, source_sequence_number,
+            state_domain = "asset_state", state_value = "AVAILABLE", evidence_type = "inference", 
+            evidence_rank = 10, evidence_event_id = event_id, reason_code = "INFERRED_FROM_LANDED", bronze_ingested_at
+    )
+    | where isnotempty(state_value)
+}
+
+.create-or-alter function 
+with (
+    folder = "Gold/State", 
+    docstring = "Select the latest state evidence per drone and state domain", 
+    skipvalidation = "true") 
+LatestStateEvidence(p_Runid:string) {
+    StateEvidence(p_Runid)
+    | extend StateKey = strcat(drone_id, "|", state_domain)
+    | partition hint.strategy = native by StateKey
+    (
+        sort by event_time desc, evidence_rank desc, source_sequence_number desc
+        | take 1  
+    )
+    | project-away StateKey
+}
+
+.create-or-alter function 
+with (
+    folder = "Gold/State", 
+    docstring = "Current coperational state per drone reconstructed from latest canonical evidence", 
+    skipvalidation = "true") 
+FleetCurrentState(p_RunId:string) {
+    LatestStateEvidence(p_RunId)
+    | summarize 
+        asset_state = take_anyif(state_value, state_domain == "asset_state"),
+        connection_state = take_anyif(state_value, state_domain  == "connection_state"),
+        mission_phase = take_anyif(state_value, state_domain  == "mission_phase"),
+        mission_status = take_anyif(state_value, state_domain == "mission_status"),        
+        platform_health = take_anyif(state_value, state_domain == "platform_health"),
+        state_as_of = max(event_time)
+    by simulator_run_id, drone_id, battalion_id, mission_id
+}
+
+.create-or-alter function 
+with (
+    folder = "Gold/Observation", 
+    docstring = "Latest canonical telemetry observation per drone", 
+    skipvalidation = "true") 
+LatestTelemetryObservation(p_RunId:string) {
+    TelemetryCanonical
+        | where simulator_run_id == p_RunId
+        | partition hint.strategy = native by drone_id
+        (
+            sort by event_time desc, source_sequence_number desc 
+            | take 1 
+        )
+        | project 
+            simulator_run_id, drone_id, battalion_id, mission_id, 
+            telemetry_as_of = event_time, telemetry_ingested_at = bronze_ingested_at, telemetry_sequence_number = source_sequence_number,
+            latitude, longitude, altitude_m, ground_speed_mps, vertical_speed_mps, heading_deg, battery_pct
+}

@@ -1,0 +1,7 @@
+.alter table MaintenanceEventsParsed policy update "[{\"IsEnabled\":true,\"Source\":\"RawDroneEvents\",\"Query\":\"TransformMaintenanceEvents()\",\"IsTransactional\":false,\"PropagateIngestionProperties\":false,\"ManagedIdentity\":null}]"
+
+.alter table StateTransitionsParsed policy update "[{\"IsEnabled\":true,\"Source\":\"RawDroneEvents\",\"Query\":\"TransformStateTransitions()\",\"IsTransactional\":false,\"PropagateIngestionProperties\":false,\"ManagedIdentity\":null}]"
+
+.alter table StatusConfirmationsParsed policy update "[{\"IsEnabled\":true,\"Source\":\"RawDroneEvents\",\"Query\":\"TransformStatusConfirmations()\",\"IsTransactional\":false,\"PropagateIngestionProperties\":false,\"ManagedIdentity\":null}]"
+
+.alter table TelemetryParsed policy update "[{\"IsEnabled\":true,\"Source\":\"RawDroneEvents\",\"Query\":\"TransformTelemetry()\",\"IsTransactional\":false,\"PropagateIngestionProperties\":false,\"ManagedIdentity\":null}]"

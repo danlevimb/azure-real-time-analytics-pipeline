@@ -1,0 +1,98 @@
+.create-or-alter function 
+with (
+    folder = "Gold/Serving", 
+    docstring = "Operational serving view combining reconstructed state with latest telemetry observation", skipvalidation = "true") 
+FleetOperationalView(p_RunId:string) {
+    FleetCurrentState(p_RunId)
+    | join kind = leftouter LatestTelemetryObservation(p_RunId) on simulator_run_id, drone_id, battalion_id, mission_id
+    | extend telemetry_state_gap_ms = datetime_diff("millisecond", state_as_of, telemetry_as_of)
+    | project
+            simulator_run_id, drone_id, battalion_id, mission_id, 
+            asset_state, connection_state,
+            mission_phase, mission_status, platform_health, 
+            latitude, longitude, altitude_m, ground_speed_mps, vertical_speed_mps, heading_deg,
+            battery_pct, telemetry_as_of, state_as_of, telemetry_state_gap_ms, telemetry_ingested_at
+}
+
+.create-or-alter function 
+with (
+    folder = "Gold/Serving", 
+    docstring = "Fleet-level operational KPIs derived from the Gold operational view", 
+    skipvalidation = "true") 
+FleetOperationalSummary(p_RunId:string) {
+    FleetOperationalView(p_RunId)
+    | summarize
+        TotalDrones = count(),
+        AvailableDrones = countif(asset_state == "AVAILABLE"),
+        ConnectedDrones = countif(connection_state == "CONNECTED"),
+        CompletedMissions = countif(mission_status == "COMPLETED"),
+        HealthyDrones = countif(platform_health == "NORMAL"),
+        AvgBatteryPct = avg(battery_pct),
+        MinBatteryPct = min(battery_pct),
+        LatestStateAsOf = max(state_as_of),
+        LatestTelemetryAsOf = max(telemetry_as_of)
+    | extend  
+        AvailabilityPct = round(100.0 * todouble(AvailableDrones) / TotalDrones, 1),
+        ConnectivityPct = round(100.0 * todouble(ConnectedDrones) / TotalDrones, 1),
+        MissionCompletionPct = round(100 * todouble(CompletedMissions) / TotalDrones, 1),
+        HealthyPct = round(100 * todouble(AvailableDrones) / TotalDrones, 1)
+    | project 
+        TotalDrones, 
+        AvailableDrones, AvailabilityPct, 
+        ConnectedDrones, ConnectivityPct,
+        CompletedMissions, MissionCompletionPct,
+        HealthyDrones, HealthyPct,
+        AvgBatteryPct, MinBatteryPct,
+        LatestStateAsOf, LatestTelemetryAsOf
+}
+
+.create-or-alter function 
+with (
+    folder = "Gold/Serving", 
+    docstring = "Most recently observed simulator run based on Event Hubs enqueue time", 
+    skipvalidation = "true") 
+LatestObservedRun() {
+    RawDroneEvents
+    | summarize 
+        LastSeenAt = max(eh_enqueued_time),
+        Events = count()
+    by RunId = tostring(simulation.simulator_run_id)
+    | top 1 by LastSeenAt desc
+}
+
+.create-or-alter function 
+with (
+    folder = "Gold/Serving", 
+    docstring = "Operational view for the most recently observed simulator run", 
+    skipvalidation = "true") 
+CurrentFleetOperationalView() {
+    let RunId = toscalar(LatestObservedRun() | project RunId);
+    FleetOperationalView(RunId)
+}
+
+.create-or-alter function 
+with (
+    folder = "Gold/Serving", 
+    docstring = "Fleet-level KPIs for the most recently observed simulator run", 
+    skipvalidation = "true") 
+CurrentFleetOperationalSummary() {
+    let RunId = toscalar(LatestObservedRun() | project RunId);
+    FleetOperationalSummary(RunId)
+}
+
+.create-or-alter function 
+with (
+    folder = "Gold/Serving", 
+    docstring = "Current geospatial operational serving dataset for fleet visualization", 
+    skipvalidation = "true") 
+CurrentFleetMapView() {
+    CurrentFleetOperationalView()
+    | extend telemetry_age_ms = datetime_diff("millisecond", now(), telemetry_ingested_at)
+    | extend telemetry_age_sec = round(todouble(telemetry_age_ms) / 1000.0, 1)
+    | project 
+        drone_id, battalion_id, mission_id, 
+        latitude, longitude, altitude_m, heading_deg, ground_speed_mps, vertical_speed_mps, battery_pct,
+        asset_state, connection_state, mission_phase, mission_status, platform_health,
+        telemetry_as_of, telemetry_ingested_at, telemetry_age_sec, state_as_of
+    | order by drone_id asc
+}
