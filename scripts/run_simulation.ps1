@@ -18,17 +18,19 @@ if (-not (Test-Path $ConfigPath)) {
 # ---------------------------------------------------------
 # Read simulator_run_id directly from YAML
 # ---------------------------------------------------------
-$RunId = & python -c @"
+$PythonCode = @'
 import sys
 import yaml
 
 path = sys.argv[1]
 
-with open(path, "r", encoding="utf-8") as f:
+with open(path, 'r', encoding='utf-8') as f:
     cfg = yaml.safe_load(f)
 
-print(cfg["simulation_context"]["simulator_run_id"])
-"@ $ConfigPath
+print(cfg['simulation_context']['simulator_run_id'])
+'@
+
+$RunId = & python -c $PythonCode $ConfigPath
 
 if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($RunId)) {
     throw "Could not read simulation_context.simulator_run_id from $Config"
