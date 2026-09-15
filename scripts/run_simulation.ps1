@@ -72,20 +72,34 @@ Write-Host "Python : $((Get-Command python).Source)"
 Write-Host "============================================================"
 Write-Host ""
 
-# ---------------------------------------------------------
-# Execute from repository root
-# ---------------------------------------------------------
-Push-Location $RepoRoot
+# ------------------------------------------------------------
+# Execute simulator and preserve full native stdout/stderr
+# ------------------------------------------------------------
+
+$PreviousErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
 
 try {
     python -m simulator.fleet_main `
-        --config $Config 2>&1 |
+        --config $ConfigPath 2>&1 |
         Tee-Object -FilePath $ConsoleLog
 
-    $ExitCode = $LASTEXITCODE
+    $PythonExitCode = $LASTEXITCODE
 }
 finally {
-    Pop-Location
+    $ErrorActionPreference = $PreviousErrorActionPreference
+}
+
+if ($PythonExitCode -ne 0) {
+    Write-Host ""
+    Write-Host "============================================================"
+    Write-Host " SIMULATION FAILED"
+    Write-Host "============================================================"
+    Write-Host "Exit code : $PythonExitCode"
+    Write-Host "Console   : $ConsoleLog"
+    Write-Host "============================================================"
+
+    throw "Simulation failed with exit code $PythonExitCode. See $ConsoleLog"
 }
 
 # ---------------------------------------------------------
