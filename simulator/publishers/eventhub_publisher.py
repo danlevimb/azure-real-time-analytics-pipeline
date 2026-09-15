@@ -57,32 +57,12 @@ class EventHubPublisher:
 
                 producer_client = (
                     EventHubProducerClient(
-                        fully_qualified_namespace=(
-                            self.
-                            fully_qualified_namespace
-                        ),
-
-                        eventhub_name=(
-                            self.eventhub_name
-                        ),
-
-                        credential=credential,
-
-                        buffered_mode=(
-                            self.buffered_mode
-                        ),
-
-                        on_success=(
-                            self._on_success
-                            if self.buffered_mode
-                            else None
-                        ),
-
-                        on_error=(
-                            self._on_error
-                            if self.buffered_mode
-                            else None
-                        ),
+                        fully_qualified_namespace = self.fully_qualified_namespace,
+                        eventhub_name = self.eventhub_name,
+                        credential = credential,
+                        buffered_mode = self.buffered_mode,
+                        on_success=self._on_success if self.buffered_mode else None,
+                        on_error = self._on_error if self.buffered_mode else None,
 
                         max_wait_time=(
                             self.
@@ -90,6 +70,7 @@ class EventHubPublisher:
                             if self.buffered_mode
                             else None
                         ),
+                        socket_timeout = 1.0,
                     )
                 )
 
