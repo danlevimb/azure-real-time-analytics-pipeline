@@ -1,16 +1,16 @@
 config_version: '1.0'
 simulation:
-  run_name: fleet250_loada_cloud_001
+  run_name: fleet250_loadb_cloud_001
   seed: 20260825
   start_time_utc: '2026-08-25T18:00:00+00:00'
   duration_seconds: 100
   tick_ms: 250
   speed_multiplier: 1.0
 telemetry:
-  interval_ms: 1000
+  interval_ms: 500
   schema_version: '1.0'
 simulation_context:
-  simulator_run_id: RUN-FLEET250-LOADA-CLOUD-001
+  simulator_run_id: RUN-FLEET250-LOADB-CLOUD-001
   scenario: controlled_operational_variability
 drone:
   drone_id: DRN-001
