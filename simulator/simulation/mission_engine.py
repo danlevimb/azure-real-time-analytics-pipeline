@@ -27,6 +27,8 @@ class MissionUpdateResult:
         default_factory=list
     )
 
+    distance_travelled_m: float = 0.0
+
 
 class MissionEngine:
 
@@ -127,6 +129,8 @@ class MissionEngine:
                 mission.climb_rate_mps
             )
 
+            altitude_before_m = drone.altitude_m
+
             altitude_increment = (
                 drone.vertical_speed_mps
                 * dt_seconds
@@ -136,6 +140,11 @@ class MissionEngine:
                 drone.altitude_m
                 + altitude_increment,
                 mission.target_altitude_m,
+            )
+
+            result.distance_travelled_m = (
+                drone.altitude_m
+                - altitude_before_m
             )
 
             if (
@@ -185,6 +194,10 @@ class MissionEngine:
 
             result.reached_waypoints.extend(
                 movement_result.reached_waypoints
+            )
+
+            result.distance_travelled_m = (
+                movement_result.distance_travelled_m
             )
 
             if movement_result.route_completed:
@@ -237,6 +250,11 @@ class MissionEngine:
             clockwise = (
                 mission.orbit_direction.upper()
                 == "CLOCKWISE"
+            )
+
+            result.distance_travelled_m = (
+                drone.ground_speed_mps
+                * dt_seconds
             )
 
             mission.orbit_angle_deg = (
@@ -312,6 +330,10 @@ class MissionEngine:
                 movement_result.reached_waypoints
             )
 
+            result.distance_travelled_m = (
+                movement_result.distance_travelled_m
+            )
+
             if movement_result.route_completed:
 
                 previous_phase = mission.phase
@@ -350,6 +372,8 @@ class MissionEngine:
                 -mission.descent_rate_mps
             )
 
+            altitude_before_m = drone.altitude_m
+
             altitude_decrement = (
                 mission.descent_rate_mps
                 * dt_seconds
@@ -359,6 +383,11 @@ class MissionEngine:
                 0.0,
                 drone.altitude_m
                 - altitude_decrement,
+            )
+
+            result.distance_travelled_m = (
+                altitude_before_m
+                - drone.altitude_m
             )
 
             if drone.altitude_m <= 0.0:

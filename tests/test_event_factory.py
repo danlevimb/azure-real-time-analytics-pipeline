@@ -152,6 +152,58 @@ class TestEventFactory(unittest.TestCase):
             "2026-08-19T18:00:01Z",
         )
 
+
+    def test_v1_0_telemetry_remains_backward_compatible(self):
+
+        drone = self._build_drone()
+        mission = self._build_mission()
+
+        event = EventFactory.telemetry(
+            drone=drone,
+            mission=mission,
+            event_time=datetime(
+                2026, 8, 19, 18, 0, 1,
+                tzinfo=timezone.utc,
+            ),
+            schema_version="1.0",
+            simulator_run_id="RUN-DRN001-001",
+            scenario="baseline",
+            seed=20260819,
+        )
+
+        self.assertNotIn(
+            "consumables",
+            event["payload"],
+        )
+
+    def test_v1_1_telemetry_contains_optic_fiber_remaining(self):
+
+        drone = self._build_drone()
+        drone.optic_fiber_remaining_m = 8421.5
+        mission = self._build_mission()
+
+        event = EventFactory.telemetry(
+            drone=drone,
+            mission=mission,
+            event_time=datetime(
+                2026, 8, 19, 18, 0, 1,
+                tzinfo=timezone.utc,
+            ),
+            schema_version="1.1",
+            simulator_run_id="RUN-DRN001-001",
+            scenario="baseline",
+            seed=20260819,
+        )
+
+        self.assertEqual(
+            event["payload"][
+                "consumables"
+            ][
+                "optic_fiber_remaining_m"
+            ],
+            8421.5,
+        )
+
     def test_maintenance_event_contract(self):
 
         drone = self._build_drone()

@@ -159,6 +159,16 @@ class EventFactory:
             },
         }
 
+        if schema_version == "1.1":
+
+            event["payload"][
+                "consumables"
+            ] = {
+                "optic_fiber_remaining_m": (
+                    drone.optic_fiber_remaining_m
+                ),
+            }
+
         return event
 
     @classmethod

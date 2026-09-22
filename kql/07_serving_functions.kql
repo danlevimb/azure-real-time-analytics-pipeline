@@ -11,7 +11,8 @@ FleetOperationalView(p_RunId:string) {
             asset_state, connection_state,
             mission_phase, mission_status, platform_health, 
             latitude, longitude, altitude_m, ground_speed_mps, vertical_speed_mps, heading_deg,
-            battery_pct, telemetry_as_of, state_as_of, telemetry_state_gap_ms, telemetry_ingested_at
+            battery_pct, optic_fiber_remaining_m,
+            telemetry_as_of, state_as_of, telemetry_state_gap_ms, telemetry_ingested_at
 }
 
 .create-or-alter function 
@@ -29,13 +30,15 @@ FleetOperationalSummary(p_RunId:string) {
         HealthyDrones = countif(platform_health == "NORMAL"),
         AvgBatteryPct = avg(battery_pct),
         MinBatteryPct = min(battery_pct),
+        AvgOpticFiberRemainingM = avg(optic_fiber_remaining_m),
+        MinOpticFiberRemainingM = min(optic_fiber_remaining_m),
         LatestStateAsOf = max(state_as_of),
         LatestTelemetryAsOf = max(telemetry_as_of)
     | extend  
         AvailabilityPct = round(100.0 * todouble(AvailableDrones) / TotalDrones, 1),
         ConnectivityPct = round(100.0 * todouble(ConnectedDrones) / TotalDrones, 1),
         MissionCompletionPct = round(100 * todouble(CompletedMissions) / TotalDrones, 1),
-        HealthyPct = round(100 * todouble(AvailableDrones) / TotalDrones, 1)
+        HealthyPct = round(100 * todouble(HealthyDrones) / TotalDrones, 1)
     | project 
         TotalDrones, 
         AvailableDrones, AvailabilityPct, 
@@ -43,6 +46,7 @@ FleetOperationalSummary(p_RunId:string) {
         CompletedMissions, MissionCompletionPct,
         HealthyDrones, HealthyPct,
         AvgBatteryPct, MinBatteryPct,
+        AvgOpticFiberRemainingM, MinOpticFiberRemainingM,
         LatestStateAsOf, LatestTelemetryAsOf
 }
 
@@ -91,7 +95,8 @@ CurrentFleetMapView() {
     | extend telemetry_age_sec = round(todouble(telemetry_age_ms) / 1000.0, 1)
     | project 
         drone_id, battalion_id, mission_id, 
-        latitude, longitude, altitude_m, heading_deg, ground_speed_mps, vertical_speed_mps, battery_pct,
+        latitude, longitude, altitude_m, heading_deg, ground_speed_mps, vertical_speed_mps,
+        battery_pct, optic_fiber_remaining_m,
         asset_state, connection_state, mission_phase, mission_status, platform_health,
         telemetry_as_of, telemetry_ingested_at, telemetry_age_sec, state_as_of
     | order by drone_id asc

@@ -97,6 +97,13 @@ def build_fleet_runtimes(
         )
     )
 
+    default_initial_optic_fiber_m = float(
+        default_operational_profile.get(
+            "initial_optic_fiber_m",
+            10000.0,
+        )
+    )
+
     runtimes: list[
         DroneRuntime
     ] = []
@@ -148,6 +155,13 @@ def build_fleet_runtimes(
             )
         )
 
+        initial_optic_fiber_m = float(
+            member_operational_profile.get(
+                "initial_optic_fiber_m",
+                default_initial_optic_fiber_m,
+            )
+        )
+
         if not (
             0.0
             <= initial_battery_pct
@@ -165,6 +179,14 @@ def build_fleet_runtimes(
             raise ValueError(
                 "battery_drain_pct_per_minute "
                 "cannot be negative for "
+                f"{drone_id}"
+            )
+
+        if initial_optic_fiber_m < 0:
+
+            raise ValueError(
+                "initial_optic_fiber_m cannot "
+                "be negative for "
                 f"{drone_id}"
             )
 
@@ -220,6 +242,10 @@ def build_fleet_runtimes(
 
             battery_pct=(
                 initial_battery_pct
+            ),
+
+            optic_fiber_remaining_m=(
+                initial_optic_fiber_m
             ),
         )
 

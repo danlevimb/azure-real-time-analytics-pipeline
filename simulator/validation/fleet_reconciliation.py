@@ -742,6 +742,23 @@ class FleetReconciliationValidator:
                     ),
 
                     (
+                        "consumables"
+                        not in payload
+                        or same_float(
+                            payload[
+                                "consumables"
+                            ][
+                                "optic_fiber_remaining_m"
+                            ],
+                            truth[
+                                "consumables"
+                            ][
+                                "optic_fiber_remaining_m"
+                            ],
+                        )
+                    ),
+
+                    (
                         payload[
                             "operations"
                         ][

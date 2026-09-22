@@ -1,7 +1,8 @@
 .create-or-alter materialized-view 
 with (
     docString = "One canonical telemetry row per logical event_id", 
-    folder = "Silver/Canonical") 
+    folder = "Silver/Canonical",
+    autoUpdateSchema = true) 
 TelemetryCanonical on table TelemetryParsed {
     TelemetryParsed
     | summarize take_any(*) by event_id

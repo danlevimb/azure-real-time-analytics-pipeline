@@ -16,6 +16,7 @@ class Drone:
     vertical_speed_mps: float = 0.0
 
     battery_pct: float = 100.0
+    optic_fiber_remaining_m: float = 10000.0
 
     asset_state: str = "AVAILABLE"
     platform_health: str = "NORMAL"

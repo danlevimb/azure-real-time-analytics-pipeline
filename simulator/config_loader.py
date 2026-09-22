@@ -142,6 +142,16 @@ def _validate_operational_profile(
     if not profile:
         return
 
+    _reject_unknown_keys(
+        profile,
+        allowed={
+            "initial_battery_pct",
+            "battery_drain_pct_per_minute",
+            "initial_optic_fiber_m",
+        },
+        path=path,
+    )
+
     initial_battery_pct = float(
         profile.get(
             "initial_battery_pct",
@@ -153,6 +163,13 @@ def _validate_operational_profile(
         profile.get(
             "battery_drain_pct_per_minute",
             0.0,
+        )
+    )
+
+    initial_optic_fiber_m = float(
+        profile.get(
+            "initial_optic_fiber_m",
+            10000.0,
         )
     )
 
@@ -175,6 +192,13 @@ def _validate_operational_profile(
         raise ValueError(
             f"{path}."
             "battery_drain_pct_per_minute "
+            "cannot be negative"
+        )
+
+    if initial_optic_fiber_m < 0:
+
+        raise ValueError(
+            f"{path}.initial_optic_fiber_m "
             "cannot be negative"
         )
 
@@ -890,7 +914,7 @@ def load_config(
             "simulation.tick_ms"
         )
 
-    _require_non_empty_string(
+    schema_version = _require_non_empty_string(
         telemetry.get(
             "schema_version"
         ),
@@ -898,6 +922,16 @@ def load_config(
             "telemetry.schema_version"
         ),
     )
+
+    if schema_version not in {
+        "1.0",
+        "1.1",
+    }:
+
+        raise ValueError(
+            "telemetry.schema_version must "
+            "be one of: 1.0, 1.1"
+        )
 
 
     # =====================================================
@@ -1788,6 +1822,20 @@ def load_config(
                     "maintenance_scenario"
                 ),
             )
+        )
+
+        _reject_unknown_keys(
+            maintenance_scenario,
+            allowed={
+                "enabled",
+                "target_drone_id",
+                "degrade_at_seconds",
+                "maintenance_duration_seconds",
+                "return_to_service_hold_seconds",
+                "maintenance_category",
+                "severity",
+            },
+            path="maintenance_scenario",
         )
 
         enabled = (

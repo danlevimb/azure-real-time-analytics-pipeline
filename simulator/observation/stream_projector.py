@@ -50,6 +50,7 @@ class ObservedDroneState:
     # -----------------------------------------------------
 
     battery_pct: float | None = None
+    optic_fiber_remaining_m: float | None = None
 
     platform_health: str | None = None
     connection_state: str | None = None
@@ -263,6 +264,22 @@ class ObservedStateProjector:
         state.battery_pct = power[
             "battery_pct"
         ]
+
+        consumables = payload.get(
+            "consumables",
+            {},
+        )
+
+        if (
+            "optic_fiber_remaining_m"
+            in consumables
+        ):
+
+            state.optic_fiber_remaining_m = (
+                consumables[
+                    "optic_fiber_remaining_m"
+                ]
+            )
 
         # -------------------------------------------------
         # Health

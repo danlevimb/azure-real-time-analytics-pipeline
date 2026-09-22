@@ -233,6 +233,81 @@ class TestFleetConfigValidation(
                 config
             )
 
+
+    def test_negative_optic_fiber_fails(
+        self,
+    ):
+
+        config = copy.deepcopy(
+            self.base_config
+        )
+
+        config[
+            "fleet"
+        ][
+            "members"
+        ][
+            0
+        ][
+            "operational_profile"
+        ][
+            "initial_optic_fiber_m"
+        ] = -1.0
+
+        with self.assertRaises(
+            ValueError
+        ):
+
+            self._load_mutated(
+                config
+            )
+
+    def test_unknown_operational_profile_key_fails(
+        self,
+    ):
+
+        config = copy.deepcopy(
+            self.base_config
+        )
+
+        config[
+            "drone"
+        ][
+            "operational_profile"
+        ][
+            "fiber_meters_typo"
+        ] = 1000.0
+
+        with self.assertRaises(
+            ValueError
+        ):
+
+            self._load_mutated(
+                config
+            )
+
+    def test_unsupported_event_schema_version_fails(
+        self,
+    ):
+
+        config = copy.deepcopy(
+            self.base_config
+        )
+
+        config[
+            "telemetry"
+        ][
+            "schema_version"
+        ] = "9.9"
+
+        with self.assertRaises(
+            ValueError
+        ):
+
+            self._load_mutated(
+                config
+            )
+
     def test_duplicate_and_drop_same_target_fails(
         self,
     ):

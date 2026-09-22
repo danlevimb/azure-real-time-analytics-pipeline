@@ -1,7 +1,7 @@
 .create-or-alter function 
 with (
     folder = "Silver/Transforms", 
-    docstring = "Parse Event Contract v1 telemetry events from RawDroneEvents", 
+    docstring = "Parse Event Contract v1.0/v1.1 telemetry events from RawDroneEvents", 
     skipvalidation = "true")    
 TransformTelemetry() {
     RawDroneEvents
@@ -31,7 +31,8 @@ TransformTelemetry() {
         asset_state             = tostring(payload.operations.asset_state),
         mission_status          = tostring(payload.operations.mission_status),
         mission_phase           = tostring(payload.operations.mission_phase),
-        bronze_ingested_at      = ingestion_time()
+        bronze_ingested_at      = ingestion_time(),
+        optic_fiber_remaining_m = todouble(payload.consumables.optic_fiber_remaining_m)
 }
 
 .create-or-alter function 

@@ -24,8 +24,10 @@ def parse_args():
     return parser.parse_args()
 
 from simulator.config_loader import (load_config,)
+from simulator.communications.comms_gate import (CommsGate,)
 from simulator.domain.mission import (MissionPhase,)
 from simulator.observability.delivery_logger import (DeliveryLogger,)
+from simulator.observability.comms_logger import (CommsLogger,)
 from simulator.observability.generated_event_logger import (GeneratedEventLogger,)
 from simulator.observability.ground_truth_logger import (GroundTruthLogger,)
 from simulator.observability.run_manifest import (write_run_manifest,)
@@ -35,6 +37,7 @@ from simulator.simulation.clock import (SimulationClock,)
 from simulator.simulation.fleet_factory import (build_fleet_runtimes,)
 from simulator.simulation.mission_engine import (MissionEngine,)
 from simulator.simulation.power_model import (update_battery,)
+from simulator.simulation.optic_fiber_model import (update_optic_fiber,)
 from simulator.scenarios.maintenance_lifecycle import (MaintenanceLifecycleScenario,)
 from simulator.scenarios.connectivity import (ConnectivityScenario,)
 from simulator.telemetry.event_factory import (EventFactory,)
@@ -414,6 +417,20 @@ def main() -> None:
         )
     )
 
+    comms_logger = (
+        CommsLogger(
+            output_path=(
+                output_dir
+                / "comms_log.jsonl"
+            ),
+            simulator_run_id=(
+                simulation_context[
+                    "simulator_run_id"
+                ]
+            ),
+        )
+    )
+
     # =====================================================
     # Physical delivery fan-out
     #
@@ -494,10 +511,6 @@ def main() -> None:
         event: dict,
     ):
 
-        generated_event_logger.log(
-            event
-        )
-
         submission = transport.submit(
             event=event,
 
@@ -565,6 +578,60 @@ def main() -> None:
             )
 
         return submission
+
+    # =====================================================
+    # Producer-side communications gate
+    #
+    # Event Contract is applied when an event is generated.
+    # This gate only decides whether that valid logical event
+    # can leave the drone and enter shared transport.
+    # =====================================================
+
+    def route_generated_event(
+        *,
+        event: dict,
+        drone,
+        force_transmit: bool = False,
+    ):
+
+        generated_event_logger.log(
+            event
+        )
+
+        decision = CommsGate.evaluate(
+            drone=drone,
+            force_transmit=force_transmit,
+        )
+
+        comms_logger.log_decision(
+            event=event,
+            decision=decision,
+            connection_state=(
+                drone.connection_state
+            ),
+            decided_at=clock.now,
+            decided_at_seconds=(
+                clock.elapsed_seconds
+            ),
+        )
+
+        if not decision.transmit:
+
+            print(
+                f"[COMMS BLOCKED] "
+                f"T+{clock.elapsed_seconds:05.2f}s "
+                f"{drone.drone_id} "
+                f"seq="
+                f"{event['source_sequence_number']:04d} "
+                f"type={event['event_type']} "
+                f"reason={decision.reason}"
+            )
+
+            return None
+
+        return submit_to_transport(
+            event
+        )
 
     # =====================================================
     # Runtime
@@ -699,8 +766,9 @@ def main() -> None:
             )
         )
 
-        submit_to_transport(
-            initial_transition_event
+        route_generated_event(
+            event=initial_transition_event,
+            drone=drone,
         )
 
         print(
@@ -790,6 +858,13 @@ def main() -> None:
                 ),
             )
 
+            update_optic_fiber(
+                drone=drone,
+                distance_travelled_m=(
+                    result.distance_travelled_m
+                ),
+            )
+
             # ---------------------------------------------
             # Mission phase transition
             #
@@ -858,8 +933,9 @@ def main() -> None:
                     )
                 )
 
-                submit_to_transport(
-                    transition_event
+                route_generated_event(
+                    event=transition_event,
+                    drone=drone,
                 )
 
                 print(
@@ -925,8 +1001,9 @@ def main() -> None:
                     scenario_events
                 ):
 
-                    submit_to_transport(
-                        scenario_event
+                    route_generated_event(
+                        event=scenario_event,
+                        drone=drone,
                     )
 
                     print(
@@ -993,8 +1070,10 @@ def main() -> None:
                     connectivity_events
                 ):
 
-                    submit_to_transport(
-                        connectivity_event
+                    route_generated_event(
+                        event=connectivity_event,
+                        drone=drone,
+                        force_transmit=True,
                     )
 
                     print(
@@ -1051,8 +1130,9 @@ def main() -> None:
                     )
                 )
 
-                submit_to_transport(
-                    event
+                route_generated_event(
+                    event=event,
+                    drone=drone,
                 )
 
             # ---------------------------------------------
@@ -1383,6 +1463,7 @@ def main() -> None:
         ground_truth_logger.close()
         delivery_logger.close()
         generated_event_logger.close()
+        comms_logger.close()
 
     if eventhub_publisher is not None:
 

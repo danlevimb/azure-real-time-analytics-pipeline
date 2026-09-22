@@ -109,5 +109,58 @@ class TestObservedStateProjector(
         )
 
 
+    def test_v1_1_telemetry_projects_optic_fiber_remaining(
+        self,
+    ):
+
+        event = {
+            "event_type": "telemetry",
+            "event_time": "2026-09-22T18:00:00Z",
+            "drone_id": "DRN-001",
+            "battalion_id": "BTN-01",
+            "mission_id": "MSN-001",
+            "source_sequence_number": 1,
+            "payload": {
+                "position": {
+                    "latitude": 72.0,
+                    "longitude": -40.0,
+                    "altitude_m": 120.0,
+                },
+                "movement": {
+                    "ground_speed_mps": 20.0,
+                    "vertical_speed_mps": 0.0,
+                    "heading_deg": 45.0,
+                },
+                "power": {
+                    "battery_pct": 98.0,
+                },
+                "consumables": {
+                    "optic_fiber_remaining_m": 8421.5,
+                },
+                "health": {
+                    "platform_health": "NORMAL",
+                },
+                "communications": {
+                    "connection_state": "CONNECTED",
+                },
+                "operations": {
+                    "asset_state": "ACTIVE",
+                    "mission_status": "ACTIVE",
+                    "mission_phase": "EN_ROUTE",
+                },
+            },
+        }
+
+        state = ObservedStateProjector().project(
+            [event]
+        )
+
+        self.assertEqual(
+            state.optic_fiber_remaining_m,
+            8421.5,
+        )
+
+
+
 if __name__ == "__main__":
     unittest.main()

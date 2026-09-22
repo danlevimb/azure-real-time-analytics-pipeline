@@ -1,0 +1,26 @@
+// ============================================================
+// Event Contract v1.1 migration
+// Adds optical-fiber consumable telemetry without changing the
+// RawDroneEvents envelope or any v1.0 field semantics.
+//
+// Run while no simulator execution is actively ingesting.
+//
+// Recommended execution order in the target database:
+//   1) Run this migration.
+//   2) Re-run 02_transform_functions.kql.
+//   3) Re-run 04_materialized_views.kql.
+//   4) Re-run 06_state_functions.kql.
+//   5) Re-run 07_serving_functions.kql.
+//
+// Existing v1.0 telemetry remains valid; the new column is null
+// for historical v1.0 rows.
+// ============================================================
+
+// Enable schema propagation before extending the source table.
+.alter materialized-view TelemetryCanonical autoUpdateSchema true
+
+// Keep the existing TelemetryParsed schema and append the new
+// v1.1 field. Existing rows receive null in the new column.
+.alter-merge table TelemetryParsed (
+    optic_fiber_remaining_m:real
+)

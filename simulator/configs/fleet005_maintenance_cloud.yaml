@@ -101,12 +101,9 @@ transport:
 maintenance_scenario:
   enabled: true
   target_drone_id: "DRN-001"
-  disconnect_at_seconds: 60
   degrade_at_seconds: 55.0
   maintenance_duration_seconds: 8.0
   return_to_service_hold_seconds: 2.0
-  reconnect_at_seconds = null
-  reason_code: "SIMULATED_LINK_LOSS"
   maintenance_category: "PLATFORM_INSPECTION"
   severity: "MEDIUM"
 

@@ -1,4 +1,4 @@
-config_version: '1.0'
+config_version: '1.1'
 simulation:
   run_name: fleet060_demo_cloud_001
   seed: 20260825
@@ -8,7 +8,7 @@ simulation:
   speed_multiplier: 1.0
 telemetry:
   interval_ms: 1000
-  schema_version: '1.0'
+  schema_version: '1.1'
 simulation_context:
   simulator_run_id: RUN-FLEET060-DEMO-CLOUD-001
   scenario: controlled_operational_variability
@@ -25,6 +25,7 @@ drone:
   operational_profile:
     initial_battery_pct: 100.0
     battery_drain_pct_per_minute: 6.0
+    initial_optic_fiber_m: 10000.0
 fleet:
   fleet_id: FLEET-01
   battalion_id: BTN-01

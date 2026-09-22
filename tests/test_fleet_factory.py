@@ -150,6 +150,12 @@ class TestFleetFactory(
                 0.0,
             )
 
+            self.assertEqual(
+                runtime.drone.
+                optic_fiber_remaining_m,
+                10000.0,
+            )
+
     def test_operational_profile_overrides_are_applied(
         self,
     ):
@@ -212,6 +218,51 @@ class TestFleetFactory(
                 1
             ].battery_drain_pct_per_minute,
             8.0,
+        )
+
+
+    def test_optic_fiber_profile_overrides_are_applied(
+        self,
+    ):
+
+        config = copy.deepcopy(
+            self.config
+        )
+
+        config[
+            "drone"
+        ][
+            "operational_profile"
+        ] = {
+            "initial_optic_fiber_m": 9000.0,
+        }
+
+        config[
+            "fleet"
+        ][
+            "members"
+        ][
+            1
+        ][
+            "operational_profile"
+        ] = {
+            "initial_optic_fiber_m": 7500.0,
+        }
+
+        runtimes = build_fleet_runtimes(
+            config
+        )
+
+        self.assertEqual(
+            runtimes[0].drone.
+            optic_fiber_remaining_m,
+            9000.0,
+        )
+
+        self.assertEqual(
+            runtimes[1].drone.
+            optic_fiber_remaining_m,
+            7500.0,
         )
 
     def test_routes_are_geographically_offset(

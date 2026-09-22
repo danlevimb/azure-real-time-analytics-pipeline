@@ -14,6 +14,7 @@ from simulator.simulation.geodesy import (
 class MovementResult:
     reached_waypoints: list[str]
     route_completed: bool
+    distance_travelled_m: float = 0.0
 
 
 class MovementEngine:
@@ -85,6 +86,7 @@ class MovementEngine:
     ) -> MovementResult:
 
         reached_waypoints: list[str] = []
+        distance_travelled_m = 0.0
 
         distance_budget_m = (
             drone.ground_speed_mps
@@ -130,6 +132,10 @@ class MovementEngine:
                     remaining_distance_m
                 )
 
+                distance_travelled_m += (
+                    remaining_distance_m
+                )
+
                 reached_waypoints.append(
                     waypoint.waypoint_id
                 )
@@ -137,6 +143,10 @@ class MovementEngine:
                 route.advance()
 
             else:
+                step_distance_m = (
+                    distance_budget_m
+                )
+
                 (
                     drone.latitude,
                     drone.longitude,
@@ -144,7 +154,11 @@ class MovementEngine:
                     latitude_deg=drone.latitude,
                     longitude_deg=drone.longitude,
                     bearing_deg=bearing_deg,
-                    distance_m=distance_budget_m,
+                    distance_m=step_distance_m,
+                )
+
+                distance_travelled_m += (
+                    step_distance_m
                 )
 
                 distance_budget_m = 0
@@ -152,4 +166,7 @@ class MovementEngine:
         return MovementResult(
             reached_waypoints=reached_waypoints,
             route_completed=route.is_complete,
+            distance_travelled_m=(
+                distance_travelled_m
+            ),
         )

@@ -108,6 +108,12 @@ class GroundTruthLogger:
                 ),
             },
 
+            "consumables": {
+                "optic_fiber_remaining_m": (
+                    drone.optic_fiber_remaining_m
+                ),
+            },
+
             "states": {
                 "asset_state": (
                     drone.asset_state

@@ -104,6 +104,13 @@ class TestGroundTruthLogger(unittest.TestCase):
             )
 
             self.assertEqual(
+                snapshot["consumables"][
+                    "optic_fiber_remaining_m"
+                ],
+                10000.0,
+            )
+
+            self.assertEqual(
                 snapshot["states"][
                     "mission_phase"
                 ],
