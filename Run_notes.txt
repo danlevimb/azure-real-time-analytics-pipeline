@@ -1,0 +1,18 @@
+# 1. ¿Quién soy en Azure?
+az account show --output table
+
+# 2. ¿Puedo obtener un token válido para Event Hubs?
+az account get-access-token `
+    --scope "https://eventhubs.azure.net/.default" `
+    --query "{expiresOn:expiresOn, tenant:tenant}" `
+    --output table
+
+# 3. ¿Puedo alcanzar Event Hubs por AMQP?
+Test-NetConnection `
+    ehns-drone-rti-dev-eus-01.servicebus.windows.net `
+    -Port 5671
+
+# 4. ¿Puedo alcanzar Azure/Event Hubs por HTTPS?
+Test-NetConnection `
+    ehns-drone-rti-dev-eus-01.servicebus.windows.net `
+    -Port 443

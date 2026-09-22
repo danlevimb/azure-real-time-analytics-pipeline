@@ -1,6 +1,6 @@
 config_version: '1.0'
 simulation:
-  run_name: fleet250_loadb_cloud_002
+  run_name: fleet250_disconnect_cloud_001
   seed: 20260921
   start_time_utc: '2026-09-21T14:50:00+00:00'
   duration_seconds: 100
@@ -1820,16 +1820,19 @@ transport:
     drop_targets: []
     extra_delay_targets: []
 maintenance_scenario:
-  enabled: true
-  target_drone_id: DRN-001
-  disconnect_at_seconds: 60.0
-  recconnect_at_seconds: null
-  reason_code: "SIMULATED_LINK_LOSS"
+  enabled: false
   degrade_at_seconds: 55.0
   maintenance_duration_seconds: 8.0
   return_to_service_hold_seconds: 2.0
   maintenance_category: PLATFORM_INSPECTION
   severity: MEDIUM
+connectivity_scenario:
+  enabled: true
+  target_drone_id: DRN-001
+  disconnect_at_seconds: 60.0
+  reconnect_at_seconds: null
+  reason_code: "SIMULATED_LINK_LOSS"
+  
 publishers:
   file:
     enabled: true

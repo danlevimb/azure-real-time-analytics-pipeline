@@ -36,6 +36,7 @@ from simulator.simulation.fleet_factory import (build_fleet_runtimes,)
 from simulator.simulation.mission_engine import (MissionEngine,)
 from simulator.simulation.power_model import (update_battery,)
 from simulator.scenarios.maintenance_lifecycle import (MaintenanceLifecycleScenario,)
+from simulator.scenarios.connectivity import (ConnectivityScenario,)
 from simulator.telemetry.event_factory import (EventFactory,)
 from simulator.transport.transport_engine import (TransportEngine,)
 
@@ -165,6 +166,12 @@ def main() -> None:
 
     maintenance_scenario = (
         MaintenanceLifecycleScenario.from_config(
+            config
+        )
+    )
+    
+    connectivity_scenario = (
+        ConnectivityScenario.from_config(
             config
         )
     )
@@ -932,6 +939,73 @@ def main() -> None:
                         f"{scenario_event['source_sequence_number']:04d} "
                         f"| payload="
                         f"{scenario_event['payload']}"
+                    )
+            
+            # ---------------------------------------------
+            # Optional connectivity scenario
+            #
+            # Changes simulated communication state before
+            # Ground Truth and Telemetry are generated.
+            # ---------------------------------------------
+
+            if connectivity_scenario is not None:
+
+                connectivity_events = (
+                    connectivity_scenario.update(
+                        drone=drone,
+                        mission=mission,
+
+                        current_seconds=(
+                            clock.elapsed_seconds
+                        ),
+
+                        event_time=(
+                            clock.now
+                        ),
+
+                        schema_version=(
+                            telemetry_config[
+                                "schema_version"
+                            ]
+                        ),
+
+                        simulator_run_id=(
+                            simulation_context[
+                                "simulator_run_id"
+                            ]
+                        ),
+
+                        scenario=(
+                            simulation_context[
+                                "scenario"
+                            ]
+                        ),
+
+                        seed=(
+                            simulation[
+                                "seed"
+                            ]
+                        ),
+                    )
+                )
+
+                for connectivity_event in (
+                    connectivity_events
+                ):
+
+                    submit_to_transport(
+                        connectivity_event
+                    )
+
+                    print(
+                        f"[CONNECTIVITY EVENT] "
+                        f"T+"
+                        f"{clock.elapsed_seconds:05.2f}s "
+                        f"{drone.drone_id} "
+                        f"| seq="
+                        f"{connectivity_event['source_sequence_number']:04d} "
+                        f"| payload="
+                        f"{connectivity_event['payload']}"
                     )
 
             # ---------------------------------------------

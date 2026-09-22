@@ -1,7 +1,6 @@
 from datetime import datetime
 from pathlib import Path
 import re
-
 import yaml
 
 
@@ -16,7 +15,6 @@ REQUIRED_BASE_SECTIONS = (
     "transport",
 )
 
-
 ALLOWED_TOP_LEVEL_SECTIONS = set(
     REQUIRED_BASE_SECTIONS
 ) | {
@@ -24,8 +22,8 @@ ALLOWED_TOP_LEVEL_SECTIONS = set(
     "fleet",
     "maintenance_scenario",
     "publishers",
+    "connectivity_scenario"
 }
-
 
 def _reject_unknown_keys(
     mapping: dict,
@@ -60,9 +58,7 @@ def _require_mapping(
         dict,
     ):
 
-        raise ValueError(
-            f"{path} must be a mapping"
-        )
+        raise ValueError(f"{path} must be a mapping")
 
     return value
 
@@ -1913,4 +1909,132 @@ def load_config(
                     "cannot be negative"
                 )
 
+    # =====================================================
+    # Connectivity scenario
+    # =====================================================
+
+    connectivity_scenario = config.get(
+        "connectivity_scenario",
+        {},
+    )
+
+    if connectivity_scenario:
+
+        connectivity_scenario = (
+            _require_mapping(
+                connectivity_scenario,
+                path="connectivity_scenario",
+            )
+        )
+
+        _reject_unknown_keys(
+            connectivity_scenario,
+            allowed={
+                "enabled",
+                "target_drone_id",
+                "disconnect_at_seconds",
+                "reconnect_at_seconds",
+                "reason_code",
+                "severity",
+            },
+            path="connectivity_scenario",
+        )
+
+        enabled = connectivity_scenario.get(
+            "enabled",
+            False,
+        )
+
+        if not isinstance(enabled, bool):
+            raise ValueError(
+                "connectivity_scenario.enabled "
+                "must be boolean"
+            )
+
+        if enabled:
+
+            if fleet_drone_ids is None:
+                raise ValueError(
+                    "connectivity_scenario "
+                    "requires a fleet section"
+                )
+
+            target_drone_id = (
+                _require_non_empty_string(
+                    connectivity_scenario.get(
+                        "target_drone_id"
+                    ),
+                    path=(
+                        "connectivity_scenario."
+                        "target_drone_id"
+                    ),
+                )
+            )
+
+            if target_drone_id not in fleet_drone_ids:
+                raise ValueError(
+                    "connectivity_scenario."
+                    "target_drone_id is not "
+                    "a fleet member: "
+                    f"{target_drone_id}"
+                )
+
+            disconnect_at_seconds = (
+                connectivity_scenario.get(
+                    "disconnect_at_seconds"
+                )
+            )
+
+            if (
+                not isinstance(
+                    disconnect_at_seconds,
+                    (int, float),
+                )
+                or disconnect_at_seconds < 0
+                or disconnect_at_seconds
+                >= duration_seconds
+            ):
+                raise ValueError(
+                    "connectivity_scenario."
+                    "disconnect_at_seconds must "
+                    "be >= 0 and less than "
+                    "simulation.duration_seconds"
+                )
+
+            reconnect_at_seconds = (
+                connectivity_scenario.get(
+                    "reconnect_at_seconds"
+                )
+            )
+
+            if reconnect_at_seconds is not None:
+
+                if (
+                    not isinstance(
+                        reconnect_at_seconds,
+                        (int, float),
+                    )
+                    or reconnect_at_seconds
+                    <= disconnect_at_seconds
+                    or reconnect_at_seconds
+                    >= duration_seconds
+                ):
+                    raise ValueError(
+                        "connectivity_scenario."
+                        "reconnect_at_seconds must "
+                        "be greater than "
+                        "disconnect_at_seconds and "
+                        "less than simulation."
+                        "duration_seconds"
+                    )
+
+            _require_non_empty_string(
+                connectivity_scenario.get(
+                    "reason_code"
+                ),
+                path=(
+                    "connectivity_scenario."
+                    "reason_code"
+                ),
+            )
     return config
