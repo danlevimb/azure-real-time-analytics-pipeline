@@ -25,6 +25,7 @@ def parse_args():
 
 from simulator.config_loader import (load_config,)
 from simulator.communications.comms_gate import (CommsGate,)
+from simulator.communications.onboard_buffer import (OnboardBuffer,)
 from simulator.domain.mission import (MissionPhase,)
 from simulator.observability.delivery_logger import (DeliveryLogger,)
 from simulator.observability.comms_logger import (CommsLogger,)
@@ -430,7 +431,9 @@ def main() -> None:
             ),
         )
     )
-
+    
+    onboard_buffer = OnboardBuffer()
+    
     # =====================================================
     # Physical delivery fan-out
     #
@@ -594,14 +597,9 @@ def main() -> None:
         force_transmit: bool = False,
     ):
 
-        generated_event_logger.log(
-            event
-        )
+        generated_event_logger.log(event)
 
-        decision = CommsGate.evaluate(
-            drone=drone,
-            force_transmit=force_transmit,
-        )
+        decision = CommsGate.evaluate(drone=drone, force_transmit=force_transmit,)
 
         comms_logger.log_decision(
             event=event,
@@ -617,9 +615,52 @@ def main() -> None:
 
         if not decision.transmit:
 
+            should_buffer = (
+                connectivity_scenario
+                is not None
+                and connectivity_scenario.
+                applies_to(
+                    drone.drone_id
+                )
+                and connectivity_scenario.
+                reconnect_at_seconds
+                is not None
+            )
+
+            if should_buffer:
+
+                onboard_buffer.add(event=event)
+
+                comms_logger.log_buffer_action(
+                    event=event,
+                    action="BUFFERED",
+                    connection_state=(
+                        drone.connection_state
+                    ),
+                    acted_at=clock.now,
+                    acted_at_seconds=(
+                        clock.elapsed_seconds
+                    ),
+                )
+
+                print(
+                    f"[COMMS BUFFERED] "
+                    f"T+"
+                    f"{clock.elapsed_seconds:05.2f}s "
+                    f"{drone.drone_id} "
+                    f"seq="
+                    f"{event['source_sequence_number']:04d} "
+                    f"type={event['event_type']} "
+                    f"pending="
+                    f"{onboard_buffer.count_for(drone_id=drone.drone_id)}"
+                )
+
+                return None
+
             print(
                 f"[COMMS BLOCKED] "
-                f"T+{clock.elapsed_seconds:05.2f}s "
+                f"T+"
+                f"{clock.elapsed_seconds:05.2f}s "
                 f"{drone.drone_id} "
                 f"seq="
                 f"{event['source_sequence_number']:04d} "
@@ -1070,6 +1111,23 @@ def main() -> None:
                     connectivity_events
                 ):
 
+                    payload = (
+                        connectivity_event[
+                            "payload"
+                        ]
+                    )
+
+                    is_reconnect = (
+                        payload.get(
+                            "state_domain"
+                        )
+                        == "connection_state"
+                        and payload.get(
+                            "new_state"
+                        )
+                        == "CONNECTED"
+                    )
+
                     route_generated_event(
                         event=connectivity_event,
                         drone=drone,
@@ -1086,6 +1144,60 @@ def main() -> None:
                         f"| payload="
                         f"{connectivity_event['payload']}"
                     )
+
+                    if is_reconnect:
+
+                        buffered_events = (
+                            onboard_buffer.drain(
+                                drone_id=(
+                                    drone.drone_id
+                                )
+                            )
+                        )
+
+                        if buffered_events:
+
+                            print(
+                                f"[ONBOARD BUFFER FLUSH START] "
+                                f"T+"
+                                f"{clock.elapsed_seconds:05.2f}s "
+                                f"{drone.drone_id} "
+                                f"events="
+                                f"{len(buffered_events)}"
+                            )
+
+                        for buffered_event in (
+                            buffered_events
+                        ):
+
+                            submit_to_transport(
+                                buffered_event
+                            )
+
+                            comms_logger.log_buffer_action(
+                                event=buffered_event,
+                                action="FLUSHED",
+                                connection_state=(
+                                    drone.connection_state
+                                ),
+                                acted_at=clock.now,
+                                acted_at_seconds=(
+                                    clock.elapsed_seconds
+                                ),
+                            )
+
+                        if buffered_events:
+
+                            print(
+                                f"[ONBOARD BUFFER FLUSH COMPLETE] "
+                                f"T+"
+                                f"{clock.elapsed_seconds:05.2f}s "
+                                f"{drone.drone_id} "
+                                f"events="
+                                f"{len(buffered_events)} "
+                                f"pending="
+                                f"{onboard_buffer.count_for(drone_id=drone.drone_id)}"
+                            )
 
             # ---------------------------------------------
             # Ground Truth

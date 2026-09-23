@@ -1,8 +1,8 @@
 config_version: '1.1'
 simulation:
-  run_name: fleet250_reconnect_buffer_v11_cloud_001
-  seed: 20260921
-  start_time_utc: '2026-09-21T14:50:00+00:00'
+  run_name: fleet250_duplicate_check_cloud_001
+  seed: 20260923
+  start_time_utc: '2026-09-23T13:21:00+00:00'
   duration_seconds: 100
   tick_ms: 250
   speed_multiplier: 1.0
@@ -10,7 +10,7 @@ telemetry:
   interval_ms: 500
   schema_version: '1.1'
 simulation_context:
-  simulator_run_id: RUN-FLEET250-RECONNECT-CLOUD-001
+  simulator_run_id: RUN-DUPLICATE-CHECK-CLOUD-001
   scenario: connectivity_recovery
 drone:
   drone_id: DRN-001
@@ -1832,8 +1832,8 @@ connectivity_scenario:
   target_drone_id: DRN-001
   disconnect_at_seconds: 60.0
   reconnect_at_seconds: 80.0
-  reason_code: "SIMULATED_LINK_LOSS"
-  severity: MEDIUM  
+  reason_code: SIMULATED_LINK_LOSS
+  severity: MEDIUM
 publishers:
   file:
     enabled: true

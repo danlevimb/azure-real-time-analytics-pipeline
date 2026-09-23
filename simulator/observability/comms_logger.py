@@ -77,6 +77,66 @@ class CommsLogger:
         self._file.write("\n")
         self._file.flush()
 
+    def log_buffer_action(
+        self,
+        *,
+        event: dict,
+        action: str,
+        connection_state: str,
+        acted_at: datetime,
+        acted_at_seconds: float,
+    ) -> None:
+
+        if action not in {
+            "BUFFERED",
+            "FLUSHED",
+        }:
+
+            raise ValueError(
+                "Unsupported buffer action: "
+                f"{action}"
+            )
+
+        record = {
+            "record_type": (
+                "comms_buffer_action"
+            ),
+            "simulator_run_id": (
+                self.simulator_run_id
+            ),
+            "event_id": event["event_id"],
+            "event_type": event["event_type"],
+            "event_time": event["event_time"],
+            "drone_id": event["drone_id"],
+            "source_sequence_number": (
+                event[
+                    "source_sequence_number"
+                ]
+            ),
+            "connection_state": (
+                connection_state
+            ),
+            "action": action,
+            "acted_at": (
+                self._format_datetime(
+                    acted_at
+                )
+            ),
+            "acted_at_seconds": (
+                acted_at_seconds
+            ),
+        }
+
+        json.dump(
+            record,
+            self._file,
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+
+        self._file.write("\n")
+        self._file.flush()
+
     def close(self) -> None:
 
         self._file.close()

@@ -5,8 +5,8 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CONFIG_DIR = Path("simulator") / "configs"
 
-SOURCE_CONFIG = CONFIG_DIR / "fleet005_live_dashboard.yaml"
-TARGET_CONFIG = CONFIG_DIR / "fleet250_loada_cloud.yaml"
+SOURCE_CONFIG = CONFIG_DIR / "fleet250_connectivity_failure_v11_cloud.yaml"
+TARGET_CONFIG = CONFIG_DIR / "fleet250_reconnect_buffer_v11_cloud.yaml"
 
 RUN_NAME = "fleet250_loada_cloud_001"
 RUN_ID = "RUN-FLEET250-LOADA-CLOUD-001"
