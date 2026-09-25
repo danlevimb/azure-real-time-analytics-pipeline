@@ -2269,6 +2269,7 @@ def load_config(
                         "RF_JAMMING",
                     },
                     "FIBER": {
+                        "FIBER_LINK_LOSS",
                         "FIBER_CUT",
                     },
                 }
@@ -2276,19 +2277,11 @@ def load_config(
                 template_mode = config["drone"]["communications"]["mode"]
                 target_mode = template_mode
 
-                for member in config[
-                    "fleet"
-                ][
-                    "members"
-                ]:
-
+                for member in config["fleet"]["members"]:
                     if member["drone_id"] == target_drone_id:
-
                         member_comms = member.get("communications")
-
                         if member_comms is not None:
                             target_mode = member_comms["mode"]
-
                         break
 
                 if (
@@ -2305,9 +2298,18 @@ def load_config(
                         f"{target_mode}"
                     )
 
-                connectivity_scenario[
-                    "fault_type"
-                ] = fault_type
+                if (
+                    fault_type == "FIBER_CUT"
+                    and reconnect_at_seconds
+                    is not None
+                ):
+                    raise ValueError(
+                        "FIBER_CUT is terminal for the "
+                        "current mission and cannot define "
+                        "reconnect_at_seconds"
+                    )
+
+                connectivity_scenario["fault_type"] = fault_type
 
             else:
 

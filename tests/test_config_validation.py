@@ -817,5 +817,76 @@ class TestFleetConfigValidation(
             "FIBER_CUT",
         )
 
+    def test_v1_2_accepts_recoverable_fiber_link_loss(self,):
+
+        config = copy.deepcopy(self.base_config)
+
+        config["config_version"] = "1.2"
+        config["telemetry"]["schema_version"] = "1.2"
+        config["drone"]["communications"] = {"mode": "RF",}
+
+        config["drone"]["operational_profile"].pop("initial_optic_fiber_m",None,)
+
+        config["fleet"]["members"][1]["communications"] = {"mode": "FIBER","initial_optic_fiber_m": 7500.0,}
+
+        config[
+            "connectivity_scenario"
+        ] = {
+            "enabled": True,
+            "target_drone_id": "DRN-002",
+            "disconnect_at_seconds": 60.0,
+            "reconnect_at_seconds": 80.0,
+            "fault_type": "FIBER_LINK_LOSS",
+        }
+
+        loaded = self._load_mutated(config)
+
+        self.assertEqual(loaded["connectivity_scenario"]["fault_type"],"FIBER_LINK_LOSS",)
+
+    def test_v1_2_rejects_reconnect_for_fiber_cut(
+        self,
+    ):
+
+        config = copy.deepcopy(
+            self.base_config
+        )
+
+        config["config_version"] = "1.2"
+        config["telemetry"][
+            "schema_version"
+        ] = "1.2"
+
+        config["drone"][
+            "communications"
+        ] = {
+            "mode": "RF",
+        }
+
+        config["drone"][
+            "operational_profile"
+        ].pop(
+            "initial_optic_fiber_m",
+            None,
+        )
+
+        config["fleet"]["members"][1]["communications"] = {"mode": "FIBER","initial_optic_fiber_m": 7500.0,}
+
+        config[
+            "connectivity_scenario"
+        ] = {
+            "enabled": True,
+            "target_drone_id": "DRN-002",
+            "disconnect_at_seconds": 60.0,
+            "reconnect_at_seconds": 80.0,
+            "fault_type": "FIBER_CUT",
+        }
+
+        with self.assertRaises(
+            ValueError
+        ):
+            self._load_mutated(
+                config
+            )
+    
 if __name__ == "__main__":
     unittest.main()

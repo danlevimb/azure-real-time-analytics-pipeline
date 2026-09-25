@@ -50,9 +50,7 @@ class TestConnectivityScenario(unittest.TestCase):
         )
 
     @staticmethod
-    def _scenario(
-        reconnect_at_seconds=None,
-    ) -> ConnectivityScenario:
+    def _scenario(reconnect_at_seconds=None,) -> ConnectivityScenario:
 
         return ConnectivityScenario(
             target_drone_id="DRN-001",
@@ -79,7 +77,6 @@ class TestConnectivityScenario(unittest.TestCase):
         )
 
     def test_disconnect_emits_once_and_mutates_state(self):
-
         scenario = self._scenario()
         drone = self._drone()
         mission = self._mission()
@@ -113,9 +110,7 @@ class TestConnectivityScenario(unittest.TestCase):
             "DISCONNECTED",
         )
 
-        payload = at_disconnect[0][
-            "payload"
-        ]
+        payload = at_disconnect[0]["payload"]
 
         self.assertEqual(
             payload["state_domain"],
@@ -132,9 +127,8 @@ class TestConnectivityScenario(unittest.TestCase):
 
     def test_reconnect_emits_once_when_configured(self):
 
-        scenario = self._scenario(
-            reconnect_at_seconds=80.0,
-        )
+        scenario = self._scenario(reconnect_at_seconds=80.0,)
+
         drone = self._drone()
         mission = self._mission()
 
@@ -159,18 +153,10 @@ class TestConnectivityScenario(unittest.TestCase):
             seconds=81.0,
         )
 
-        self.assertEqual(len(reconnect), 1)
-        self.assertEqual(repeated, [])
-        self.assertEqual(
-            drone.connection_state,
-            "CONNECTED",
-        )
-        self.assertEqual(
-            reconnect[0]["payload"][
-                "new_state"
-            ],
-            "CONNECTED",
-        )
+        self.assertEqual(len(reconnect),1,)
+        self.assertEqual(repeated,[],)
+        self.assertEqual(drone.connection_state,"CONNECTED",)
+        self.assertEqual(reconnect[0]["payload"]["new_state"],"CONNECTED",)
 
     def test_rf_jamming_disconnect_reason(self):
 
@@ -220,19 +206,19 @@ class TestConnectivityScenario(unittest.TestCase):
                 seconds=60.0,
             )
 
-    def test_fiber_cut_reconnect_emits_repaired_reason(self,):
+    def test_fiber_link_loss_reconnect_emits_restore_reason(self,):
 
         scenario = ConnectivityScenario(
             target_drone_id="DRN-001",
             disconnect_at_seconds=60.0,
             reconnect_at_seconds=80.0,
-            fault_type="FIBER_CUT",
+            fault_type="FIBER_LINK_LOSS",
         )
 
         drone = self._drone("FIBER")
         mission = self._mission()
 
-        self._update(
+        disconnect = self._update(
             scenario=scenario,
             drone=drone,
             mission=mission,
@@ -246,12 +232,17 @@ class TestConnectivityScenario(unittest.TestCase):
             seconds=80.0,
         )
 
-        self.assertEqual(
-            reconnect[0]["payload"][
-                "reason_code"
-            ],
-            "FIBER_REPAIRED",
-        )
+        self.assertEqual(disconnect[0]["payload"]["reason_code"],"FIBER_LINK_LOSS",)
+        self.assertEqual(reconnect[0]["payload"]["reason_code"],"FIBER_LINK_RESTORED",)
+
+    def test_fiber_cut_rejects_reconnect(self,):
+        with self.assertRaises(ValueError):
+            ConnectivityScenario(
+                target_drone_id="DRN-001",
+                disconnect_at_seconds=60.0,
+                reconnect_at_seconds=80.0,
+                fault_type="FIBER_CUT",
+            )
 
 if __name__ == "__main__":
     unittest.main()
