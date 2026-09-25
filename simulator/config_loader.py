@@ -1901,10 +1901,7 @@ def load_config(
             ]
         )
 
-        if (
-            sequence_number
-            in seen_extra_delay_sequences
-        ):
+        if sequence_number in seen_extra_delay_sequences:
 
             raise ValueError(
                 "Duplicate source sequence "
@@ -1942,12 +1939,8 @@ def load_config(
                 "duplicate_targets",
                 [],
             ),
-            rule_name=(
-                "duplicate_targets"
-            ),
-            fleet_drone_ids=(
-                fleet_drone_ids
-            ),
+            rule_name = "duplicate_targets",
+            fleet_drone_ids = fleet_drone_ids,
         )
     )
 
@@ -2172,15 +2165,13 @@ def load_config(
                 "disconnect_at_seconds",
                 "reconnect_at_seconds",
                 "reason_code",
+                "fault_type",
                 "severity",
             },
             path="connectivity_scenario",
         )
 
-        enabled = connectivity_scenario.get(
-            "enabled",
-            False,
-        )
+        enabled = connectivity_scenario.get("enabled", False,)
 
         if not isinstance(enabled, bool):
             raise ValueError(
@@ -2216,17 +2207,10 @@ def load_config(
                     f"{target_drone_id}"
                 )
 
-            disconnect_at_seconds = (
-                connectivity_scenario.get(
-                    "disconnect_at_seconds"
-                )
-            )
+            disconnect_at_seconds = connectivity_scenario.get("disconnect_at_seconds")
 
             if (
-                not isinstance(
-                    disconnect_at_seconds,
-                    (int, float),
-                )
+                not isinstance(disconnect_at_seconds,(int, float),)
                 or disconnect_at_seconds < 0
                 or disconnect_at_seconds
                 >= duration_seconds
@@ -2238,19 +2222,12 @@ def load_config(
                     "simulation.duration_seconds"
                 )
 
-            reconnect_at_seconds = (
-                connectivity_scenario.get(
-                    "reconnect_at_seconds"
-                )
-            )
+            reconnect_at_seconds = connectivity_scenario.get("reconnect_at_seconds")
 
             if reconnect_at_seconds is not None:
 
                 if (
-                    not isinstance(
-                        reconnect_at_seconds,
-                        (int, float),
-                    )
+                    not isinstance(reconnect_at_seconds,(int, float),)
                     or reconnect_at_seconds
                     <= disconnect_at_seconds
                     or reconnect_at_seconds
@@ -2265,14 +2242,93 @@ def load_config(
                         "duration_seconds"
                     )
 
-            _require_non_empty_string(
-                connectivity_scenario.get(
-                    "reason_code"
-                ),
-                path=(
-                    "connectivity_scenario."
-                    "reason_code"
-                ),
-            )
+            if config_version == "1.2":
+                if ("reason_code" in connectivity_scenario):
+                    raise ValueError(
+                        "config_version 1.2 uses "
+                        "connectivity_scenario.fault_type "
+                        "instead of reason_code"
+                    )
+
+                fault_type = (
+                    _require_non_empty_string(
+                        connectivity_scenario.get(
+                            "fault_type"
+                        ),
+                        path=(
+                            "connectivity_scenario."
+                            "fault_type"
+                        ),
+                    )
+                    .upper()
+                )
+
+                allowed_faults_by_mode = {
+                    "RF": {
+                        "RF_LINK_LOSS",
+                        "RF_JAMMING",
+                    },
+                    "FIBER": {
+                        "FIBER_CUT",
+                    },
+                }
+
+                template_mode = config["drone"]["communications"]["mode"]
+                target_mode = template_mode
+
+                for member in config[
+                    "fleet"
+                ][
+                    "members"
+                ]:
+
+                    if member["drone_id"] == target_drone_id:
+
+                        member_comms = member.get("communications")
+
+                        if member_comms is not None:
+                            target_mode = member_comms["mode"]
+
+                        break
+
+                if (
+                    fault_type
+                    not in
+                    allowed_faults_by_mode[
+                        target_mode
+                    ]
+                ):
+                    raise ValueError(
+                        f"{fault_type} is not valid "
+                        f"for {target_drone_id} "
+                        f"communication_mode "
+                        f"{target_mode}"
+                    )
+
+                connectivity_scenario[
+                    "fault_type"
+                ] = fault_type
+
+            else:
+
+                _require_non_empty_string(
+                    connectivity_scenario.get(
+                        "reason_code"
+                    ),
+                    path=(
+                        "connectivity_scenario."
+                        "reason_code"
+                    ),
+                )
+
+                _require_non_empty_string(
+                    connectivity_scenario.get(
+                        "reason_code"
+                    ),
+                    path=(
+                        "connectivity_scenario."
+                        "reason_code"
+                    ),
+                )
     return config
 

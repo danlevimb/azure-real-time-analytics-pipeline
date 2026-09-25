@@ -1,17 +1,13 @@
 import unittest
 from datetime import datetime, timezone
-
 from simulator.domain.drone import Drone
 from simulator.domain.mission import Mission
-from simulator.scenarios.connectivity import (
-    ConnectivityScenario,
-)
-
+from simulator.scenarios.connectivity import (ConnectivityScenario,)
 
 class TestConnectivityScenario(unittest.TestCase):
 
     @staticmethod
-    def _drone() -> Drone:
+    def _drone(communication_mode="RF",) -> Drone:
 
         return Drone(
             drone_id="DRN-001",
@@ -21,6 +17,7 @@ class TestConnectivityScenario(unittest.TestCase):
             altitude_m=120.0,
             ground_speed_mps=20.0,
             heading_deg=45.0,
+            communication_mode=communication_mode,
         )
 
     @staticmethod
@@ -68,14 +65,7 @@ class TestConnectivityScenario(unittest.TestCase):
             ),
         )
 
-    def _update(
-        self,
-        *,
-        scenario,
-        drone,
-        mission,
-        seconds,
-    ):
+    def _update(self, *, scenario, drone, mission, seconds,):
 
         return scenario.update(
             drone=drone,
@@ -182,6 +172,86 @@ class TestConnectivityScenario(unittest.TestCase):
             "CONNECTED",
         )
 
+    def test_rf_jamming_disconnect_reason(self):
+
+        scenario = ConnectivityScenario(
+            target_drone_id="DRN-001",
+            disconnect_at_seconds=60.0,
+            reconnect_at_seconds=None,
+            fault_type="RF_JAMMING",
+        )
+
+        drone = self._drone("RF")
+        mission = self._mission()
+
+        events = self._update(
+            scenario=scenario,
+            drone=drone,
+            mission=mission,
+            seconds=60.0,
+        )
+
+        self.assertEqual(
+            events[0]["payload"][
+                "reason_code"
+            ],
+            "RF_JAMMING",
+        )
+
+    def test_fiber_cut_requires_fiber_drone(self):
+
+        scenario = ConnectivityScenario(
+            target_drone_id="DRN-001",
+            disconnect_at_seconds=60.0,
+            reconnect_at_seconds=None,
+            fault_type="FIBER_CUT",
+        )
+
+        drone = self._drone("RF")
+        mission = self._mission()
+
+        with self.assertRaises(
+            ValueError
+        ):
+            self._update(
+                scenario=scenario,
+                drone=drone,
+                mission=mission,
+                seconds=60.0,
+            )
+
+    def test_fiber_cut_reconnect_emits_repaired_reason(self,):
+
+        scenario = ConnectivityScenario(
+            target_drone_id="DRN-001",
+            disconnect_at_seconds=60.0,
+            reconnect_at_seconds=80.0,
+            fault_type="FIBER_CUT",
+        )
+
+        drone = self._drone("FIBER")
+        mission = self._mission()
+
+        self._update(
+            scenario=scenario,
+            drone=drone,
+            mission=mission,
+            seconds=60.0,
+        )
+
+        reconnect = self._update(
+            scenario=scenario,
+            drone=drone,
+            mission=mission,
+            seconds=80.0,
+        )
+
+        self.assertEqual(
+            reconnect[0]["payload"][
+                "reason_code"
+            ],
+            "FIBER_REPAIRED",
+        )
 
 if __name__ == "__main__":
     unittest.main()
