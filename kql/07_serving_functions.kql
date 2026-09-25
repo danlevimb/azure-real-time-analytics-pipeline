@@ -24,30 +24,30 @@ FleetOperationalSummary(p_RunId:string) {
     FleetOperationalView(p_RunId)
     | summarize
         TotalDrones = count(),
+        RfDrones = countif(communication_mode == "RF"),
+        FiberDrones = countif(communication_mode == "FIBER"),
+        UnknownCommunicationModeDrones = countif(isempty(communication_mode)),
         AvailableDrones = countif(asset_state == "AVAILABLE"),
         ConnectedDrones = countif(connection_state == "CONNECTED"),
         CompletedMissions = countif(mission_status == "COMPLETED"),
         HealthyDrones = countif(platform_health == "NORMAL"),
         AvgBatteryPct = avg(battery_pct),
         MinBatteryPct = min(battery_pct),
-        AvgOpticFiberRemainingM = avg(optic_fiber_remaining_m),
-        MinOpticFiberRemainingM = min(optic_fiber_remaining_m),
+        AvgOpticFiberRemainingM = avgif(optic_fiber_remaining_m, communication_mode == "FIBER"),
+        MinOpticFiberRemainingM = minif(optic_fiber_remaining_m,communication_mode == "FIBER"),
         LatestStateAsOf = max(state_as_of),
         LatestTelemetryAsOf = max(telemetry_as_of)
-    | extend  
+    | extend
         AvailabilityPct = round(100.0 * todouble(AvailableDrones) / TotalDrones, 1),
         ConnectivityPct = round(100.0 * todouble(ConnectedDrones) / TotalDrones, 1),
-        MissionCompletionPct = round(100 * todouble(CompletedMissions) / TotalDrones, 1),
-        HealthyPct = round(100 * todouble(HealthyDrones) / TotalDrones, 1)
-    | project 
-        TotalDrones, 
-        AvailableDrones, AvailabilityPct, 
-        ConnectedDrones, ConnectivityPct,
-        CompletedMissions, MissionCompletionPct,
-        HealthyDrones, HealthyPct,
-        AvgBatteryPct, MinBatteryPct,
-        AvgOpticFiberRemainingM, MinOpticFiberRemainingM,
-        LatestStateAsOf, LatestTelemetryAsOf
+        MissionCompletionPct = round(100.0 * todouble(CompletedMissions) / TotalDrones, 1),
+        HealthyPct = round(100.0 * todouble(HealthyDrones) / TotalDrones, 1),
+        CommunicationModeCoveragePct = round(100.0 * todouble(RfDrones + FiberDrones) / TotalDrones, 1)
+    | project
+        TotalDrones, RfDrones, FiberDrones, UnknownCommunicationModeDrones, CommunicationModeCoveragePct,
+        AvailableDrones, AvailabilityPct, ConnectedDrones, ConnectivityPct, CompletedMissions,
+        MissionCompletionPct, HealthyDrones, HealthyPct, AvgBatteryPct, MinBatteryPct,
+        AvgOpticFiberRemainingM, MinOpticFiberRemainingM, LatestStateAsOf, LatestTelemetryAsOf
 }
 
 .create-or-alter function 
