@@ -1,0 +1,433 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/event_contract_v1_2.schema.json",
+  "title": "Synthetic Drone Event Contract v1.2",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "event_id",
+    "event_type",
+    "event_time",
+    "drone_id",
+    "battalion_id",
+    "mission_id",
+    "source_sequence_number",
+    "source_type",
+    "source_gateway_id",
+    "simulation",
+    "payload"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.2"
+    },
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_type": {
+      "enum": [
+        "telemetry",
+        "state_transition",
+        "maintenance_event",
+        "status_confirmation"
+      ]
+    },
+    "event_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "drone_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "battalion_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mission_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_sequence_number": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "source_type": {
+      "const": "virtual_drone"
+    },
+    "source_gateway_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "simulation": {
+      "type": "object",
+      "required": [
+        "simulator_run_id",
+        "scenario",
+        "seed"
+      ],
+      "properties": {
+        "simulator_run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scenario": {
+          "type": "string",
+          "minLength": 1
+        },
+        "seed": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "payload": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "telemetry"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "position",
+              "movement",
+              "power",
+              "health",
+              "communications",
+              "operations",
+              "consumables"
+            ],
+            "properties": {
+              "position": {
+                "type": "object",
+                "required": [
+                  "latitude",
+                  "longitude",
+                  "altitude_m"
+                ],
+                "properties": {
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "altitude_m": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                },
+                "additionalProperties": false
+              },
+              "movement": {
+                "type": "object",
+                "required": [
+                  "ground_speed_mps",
+                  "vertical_speed_mps",
+                  "heading_deg"
+                ],
+                "properties": {
+                  "ground_speed_mps": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "vertical_speed_mps": {
+                    "type": "number"
+                  },
+                  "heading_deg": {
+                    "type": "number",
+                    "minimum": 0,
+                    "exclusiveMaximum": 360
+                  }
+                },
+                "additionalProperties": false
+              },
+              "power": {
+                "type": "object",
+                "required": [
+                  "battery_pct"
+                ],
+                "properties": {
+                  "battery_pct": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  }
+                },
+                "additionalProperties": false
+              },
+              "consumables": {
+                "type": "object",
+                "required": [
+                  "optic_fiber_remaining_m"
+                ],
+                "properties": {
+                  "optic_fiber_remaining_m": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0
+                  }
+                },
+                "additionalProperties": false
+              },
+              "health": {
+                "type": "object",
+                "required": [
+                  "platform_health"
+                ],
+                "properties": {
+                  "platform_health": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "communications": {
+                "type": "object",
+                "required": [
+                  "connection_state",
+                  "communication_mode"
+                ],
+                "properties": {
+                  "connection_state": {
+                    "type": "string"
+                  },
+                  "communication_mode": {
+                    "enum": [
+                      "RF",
+                      "FIBER"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "operations": {
+                "type": "object",
+                "required": [
+                  "asset_state",
+                  "mission_status",
+                  "mission_phase"
+                ],
+                "properties": {
+                  "asset_state": {
+                    "type": "string"
+                  },
+                  "mission_status": {
+                    "type": "string"
+                  },
+                  "mission_phase": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false,
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "communications": {
+                      "type": "object",
+                      "required": [
+                        "communication_mode"
+                      ],
+                      "properties": {
+                        "communication_mode": {
+                          "const": "RF"
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "communications"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "consumables": {
+                      "type": "object",
+                      "required": [
+                        "optic_fiber_remaining_m"
+                      ],
+                      "properties": {
+                        "optic_fiber_remaining_m": {
+                          "type": "null"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "communications": {
+                      "type": "object",
+                      "required": [
+                        "communication_mode"
+                      ],
+                      "properties": {
+                        "communication_mode": {
+                          "const": "FIBER"
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "communications"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "consumables": {
+                      "type": "object",
+                      "required": [
+                        "optic_fiber_remaining_m"
+                      ],
+                      "properties": {
+                        "optic_fiber_remaining_m": {
+                          "type": "number",
+                          "minimum": 0
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "state_transition"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "state_domain",
+              "previous_state",
+              "new_state",
+              "reason_code"
+            ],
+            "properties": {
+              "state_domain": {
+                "type": "string"
+              },
+              "previous_state": {
+                "type": "string"
+              },
+              "new_state": {
+                "type": "string"
+              },
+              "reason_code": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "maintenance_event"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "maintenance_action",
+              "maintenance_category",
+              "reason_code",
+              "severity"
+            ],
+            "properties": {
+              "maintenance_action": {
+                "type": "string"
+              },
+              "maintenance_category": {
+                "type": "string"
+              },
+              "reason_code": {
+                "type": "string"
+              },
+              "severity": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "status_confirmation"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "state_domain",
+              "confirmed_state",
+              "confirmation_type",
+              "reason_code"
+            ],
+            "properties": {
+              "state_domain": {
+                "type": "string"
+              },
+              "confirmed_state": {
+                "type": "string"
+              },
+              "confirmation_type": {
+                "type": "string"
+              },
+              "reason_code": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

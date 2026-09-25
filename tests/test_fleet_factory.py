@@ -1,13 +1,8 @@
 import copy
 import unittest
-from pathlib import Path
-
 import yaml
-
-from simulator.simulation.fleet_factory import (
-    build_fleet_runtimes,
-)
-
+from pathlib import Path
+from simulator.simulation.fleet_factory import (build_fleet_runtimes,)
 
 class TestFleetFactory(
     unittest.TestCase
@@ -220,7 +215,6 @@ class TestFleetFactory(
             8.0,
         )
 
-
     def test_optic_fiber_profile_overrides_are_applied(
         self,
     ):
@@ -293,6 +287,186 @@ class TestFleetFactory(
             ),
         )
 
+    def test_v1_2_rf_template_creates_rf_drones_without_fiber(
+        self,
+    ):
+
+        config = copy.deepcopy(
+            self.config
+        )
+
+        config["config_version"] = "1.2"
+
+        config[
+            "drone"
+        ][
+            "communications"
+        ] = {
+            "mode": "RF",
+        }
+
+        runtimes = (
+            build_fleet_runtimes(
+                config
+            )
+        )
+
+        for runtime in runtimes:
+
+            self.assertEqual(
+                runtime.drone.
+                communication_mode,
+                "RF",
+            )
+
+            self.assertIsNone(
+                runtime.drone.
+                optic_fiber_remaining_m
+            )
+
+
+    def test_v1_2_fiber_template_creates_fiber_drones(
+        self,
+    ):
+
+        config = copy.deepcopy(
+            self.config
+        )
+
+        config["config_version"] = "1.2"
+
+        config[
+            "drone"
+        ][
+            "communications"
+        ] = {
+            "mode": "FIBER",
+            "initial_optic_fiber_m": (
+                9000.0
+            ),
+        }
+
+        runtimes = (
+            build_fleet_runtimes(
+                config
+            )
+        )
+
+        for runtime in runtimes:
+
+            self.assertEqual(
+                runtime.drone.
+                communication_mode,
+                "FIBER",
+            )
+
+            self.assertEqual(
+                runtime.drone.
+                optic_fiber_remaining_m,
+                9000.0,
+            )
+
+
+    def test_v1_2_member_can_override_rf_with_fiber(
+        self,
+    ):
+
+        config = copy.deepcopy(
+            self.config
+        )
+
+        config["config_version"] = "1.2"
+
+        config[
+            "drone"
+        ][
+            "communications"
+        ] = {
+            "mode": "RF",
+        }
+
+        config[
+            "fleet"
+        ][
+            "members"
+        ][
+            1
+        ][
+            "communications"
+        ] = {
+            "mode": "FIBER",
+            "initial_optic_fiber_m": (
+                7500.0
+            ),
+        }
+
+        runtimes = (
+            build_fleet_runtimes(
+                config
+            )
+        )
+
+        self.assertEqual(
+            runtimes[0].drone.
+            communication_mode,
+            "RF",
+        )
+
+        self.assertIsNone(
+            runtimes[0].drone.
+            optic_fiber_remaining_m
+        )
+
+        self.assertEqual(
+            runtimes[1].drone.
+            communication_mode,
+            "FIBER",
+        )
+
+        self.assertEqual(
+            runtimes[1].drone.
+            optic_fiber_remaining_m,
+            7500.0,
+        )
+
+
+    def test_v1_2_fiber_override_requires_spool_when_template_is_rf(
+        self,
+    ):
+
+        config = copy.deepcopy(
+            self.config
+        )
+
+        config["config_version"] = "1.2"
+
+        config[
+            "drone"
+        ][
+            "communications"
+        ] = {
+            "mode": "RF",
+        }
+
+        config[
+            "fleet"
+        ][
+            "members"
+        ][
+            1
+        ][
+            "communications"
+        ] = {
+            "mode": "FIBER",
+        }
+
+        with self.assertRaises(
+            ValueError
+        ):
+
+            build_fleet_runtimes(
+                config
+            )
 
 if __name__ == "__main__":
     unittest.main()

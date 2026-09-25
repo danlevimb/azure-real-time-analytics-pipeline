@@ -6,10 +6,7 @@ from datetime import (
 
 from simulator.domain.drone import Drone
 from simulator.domain.mission import Mission
-from simulator.telemetry.event_factory import (
-    EventFactory,
-)
-
+from simulator.telemetry.event_factory import (EventFactory,)
 
 class TestEventFactory(unittest.TestCase):
 
@@ -151,7 +148,6 @@ class TestEventFactory(unittest.TestCase):
             event["event_time"],
             "2026-08-19T18:00:01Z",
         )
-
 
     def test_v1_0_telemetry_remains_backward_compatible(self):
 
@@ -491,6 +487,140 @@ class TestEventFactory(unittest.TestCase):
             ],
         )
 
+    def test_v1_1_does_not_emit_communication_mode(self,):
+
+        drone = self._build_drone()
+        drone.communication_mode = "FIBER"
+        drone.optic_fiber_remaining_m = 8421.5
+
+        mission = self._build_mission()
+
+        event = EventFactory.telemetry(
+            drone=drone,
+            mission=mission,
+            event_time=datetime(
+                2026, 8, 19, 18, 0, 1,
+                tzinfo=timezone.utc,
+            ),
+            schema_version="1.1",
+            simulator_run_id="RUN-DRN001-001",
+            scenario="baseline",
+            seed=20260819,
+        )
+
+        self.assertNotIn(
+            "communication_mode",
+            event["payload"][
+                "communications"
+            ],
+        )
+
+    def test_v1_2_rf_telemetry_contains_mode_and_null_fiber(self,):
+
+        drone = self._build_drone()
+
+        drone.communication_mode = "RF"
+        drone.optic_fiber_remaining_m = None
+
+        mission = self._build_mission()
+
+        event = EventFactory.telemetry(
+            drone=drone,
+            mission=mission,
+            event_time=datetime(
+                2026, 8, 19, 18, 0, 1,
+                tzinfo=timezone.utc,
+            ),
+            schema_version="1.2",
+            simulator_run_id="RUN-DRN001-001",
+            scenario="baseline",
+            seed=20260819,
+        )
+
+        self.assertEqual(
+            event["payload"][
+                "communications"
+            ][
+                "communication_mode"
+            ],
+            "RF",
+        )
+
+        self.assertIsNone(
+            event["payload"][
+                "consumables"
+            ][
+                "optic_fiber_remaining_m"
+            ]
+        )
+
+    def test_v1_2_fiber_telemetry_contains_mode_and_fiber(self,):
+
+        drone = self._build_drone()
+
+        drone.communication_mode = "FIBER"
+        drone.optic_fiber_remaining_m = 8421.5
+
+        mission = self._build_mission()
+
+        event = EventFactory.telemetry(
+            drone=drone,
+            mission=mission,
+            event_time=datetime(
+                2026, 8, 19, 18, 0, 1,
+                tzinfo=timezone.utc,
+            ),
+            schema_version="1.2",
+            simulator_run_id="RUN-DRN001-001",
+            scenario="baseline",
+            seed=20260819,
+        )
+
+        self.assertEqual(
+            event["payload"][
+                "communications"
+            ][
+                "communication_mode"
+            ],
+            "FIBER",
+        )
+
+        self.assertEqual(
+            event["payload"][
+                "consumables"
+            ][
+                "optic_fiber_remaining_m"
+            ],
+            8421.5,
+        )
+
+    def test_v1_2_requires_communication_mode(self,):
+
+        drone = self._build_drone()
+
+        drone.communication_mode = None
+        drone.optic_fiber_remaining_m = None
+
+        mission = self._build_mission()
+
+        with self.assertRaises(
+            ValueError
+        ):
+
+            EventFactory.telemetry(
+                drone=drone,
+                mission=mission,
+                event_time=datetime(
+                    2026, 8, 19, 18, 0, 1,
+                    tzinfo=timezone.utc,
+                ),
+                schema_version="1.2",
+                simulator_run_id=(
+                    "RUN-DRN001-001"
+                ),
+                scenario="baseline",
+                seed=20260819,
+            )
 
 if __name__ == "__main__":
     unittest.main()

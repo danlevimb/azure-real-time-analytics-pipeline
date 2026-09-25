@@ -16,7 +16,7 @@ class Drone:
     vertical_speed_mps: float = 0.0
 
     battery_pct: float = 100.0
-    optic_fiber_remaining_m: float = 10000.0
+    optic_fiber_remaining_m: float | None = None
 
     asset_state: str = "AVAILABLE"
     platform_health: str = "NORMAL"
@@ -24,3 +24,6 @@ class Drone:
 
     current_mission_id: str | None = None
     source_sequence_number: int = 0
+    
+    communication_mode: str | None = None
+    

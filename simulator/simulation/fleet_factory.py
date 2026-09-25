@@ -36,45 +36,17 @@ def build_fleet_runtimes(
     config: dict,
 ) -> list[DroneRuntime]:
 
-    simulation = config[
-        "simulation"
-    ]
-
-    telemetry_config = config[
-        "telemetry"
-    ]
-
-    simulation_context = config[
-        "simulation_context"
-    ]
-
-    drone_template = config[
-        "drone"
-    ]
-
-    mission_template = config[
-        "mission"
-    ]
-
-    route_template = config[
-        "route"
-    ]
-
-    fleet_config = config[
-        "fleet"
-    ]
-
-    movement = drone_template[
-        "movement"
-    ]
-
-    orbit_config = mission_template[
-        "orbit"
-    ]
-
-    base_position = drone_template[
-        "initial_position"
-    ]
+    simulation = config["simulation"]
+    telemetry_config = config["telemetry"]
+    simulation_context = config["simulation_context"]
+    drone_template = config["drone"]
+    mission_template = config["mission"]
+    route_template = config["route"]
+    fleet_config = config["fleet"]
+    config_version = str(config.get("config_version", "1.0",))
+    movement = drone_template["movement"]
+    orbit_config = mission_template["orbit"]
+    base_position = drone_template["initial_position"]
 
     default_operational_profile = (
         drone_template.get(
@@ -97,12 +69,90 @@ def build_fleet_runtimes(
         )
     )
 
-    default_initial_optic_fiber_m = float(
-        default_operational_profile.get(
-            "initial_optic_fiber_m",
-            10000.0,
+    # =========================================================
+    # Communications defaults
+    #
+    # v1.0 / v1.1:
+    #   Preserve legacy implicit optic-fiber behavior.
+    #
+    # v1.2:
+    #   Communications are explicit and mutually exclusive:
+    #   RF or FIBER.
+    # =========================================================
+
+    default_communication_mode = None
+    default_initial_optic_fiber_m = None
+
+    if config_version == "1.2":
+
+        default_communications = (
+            drone_template.get(
+                "communications",
+                {},
+            )
         )
-    )
+
+        default_communication_mode = str(
+            default_communications[
+                "mode"
+            ]
+        ).upper()
+
+        if (
+            default_communication_mode
+            == "RF"
+        ):
+
+            if (
+                "initial_optic_fiber_m"
+                in default_communications
+            ):
+
+                raise ValueError(
+                    "RF drone template cannot "
+                    "define initial_optic_fiber_m"
+                )
+
+        elif (
+            default_communication_mode
+            == "FIBER"
+        ):
+
+            if (
+                "initial_optic_fiber_m"
+                not in default_communications
+            ):
+
+                raise ValueError(
+                    "FIBER drone template requires "
+                    "initial_optic_fiber_m"
+                )
+
+            default_initial_optic_fiber_m = (
+                float(
+                    default_communications[
+                        "initial_optic_fiber_m"
+                    ]
+                )
+            )
+
+        else:
+
+            raise ValueError(
+                "communication mode must be "
+                "RF or FIBER"
+            )
+
+    else:
+
+        default_initial_optic_fiber_m = (
+            float(
+                default_operational_profile.get(
+                    "initial_optic_fiber_m",
+                    10000.0,
+                )
+            )
+        )
 
     runtimes: list[
         DroneRuntime
@@ -155,12 +205,92 @@ def build_fleet_runtimes(
             )
         )
 
-        initial_optic_fiber_m = float(
-            member_operational_profile.get(
-                "initial_optic_fiber_m",
-                default_initial_optic_fiber_m,
+        # =========================================================
+        # Communications profile
+        # =========================================================
+
+        communication_mode = None
+
+        if config_version == "1.2":
+
+            member_communications = (
+                member.get(
+                    "communications",
+                    {},
+                )
             )
-        )
+
+            communication_mode = str(
+                member_communications.get(
+                    "mode",
+                    default_communication_mode,
+                )
+            ).upper()
+
+            if communication_mode == "RF":
+
+                if (
+                    "initial_optic_fiber_m"
+                    in member_communications
+                ):
+
+                    raise ValueError(
+                        "RF drone cannot define "
+                        "initial_optic_fiber_m "
+                        f"for {drone_id}"
+                    )
+
+                initial_optic_fiber_m = None
+
+            elif communication_mode == "FIBER":
+
+                if (
+                    "initial_optic_fiber_m"
+                    in member_communications
+                ):
+
+                    initial_optic_fiber_m = float(
+                        member_communications[
+                            "initial_optic_fiber_m"
+                        ]
+                    )
+
+                elif (
+                    default_communication_mode
+                    == "FIBER"
+                    and
+                    default_initial_optic_fiber_m
+                    is not None
+                ):
+
+                    initial_optic_fiber_m = (
+                        default_initial_optic_fiber_m
+                    )
+
+                else:
+
+                    raise ValueError(
+                        "FIBER drone requires "
+                        "initial_optic_fiber_m "
+                        f"for {drone_id}"
+                    )
+
+            else:
+
+                raise ValueError(
+                    "communication mode must be "
+                    "RF or FIBER "
+                    f"for {drone_id}"
+                )
+
+        else:
+
+            initial_optic_fiber_m = float(
+                member_operational_profile.get(
+                    "initial_optic_fiber_m",
+                    default_initial_optic_fiber_m,
+                )
+            )
 
         if not (
             0.0
@@ -182,7 +312,11 @@ def build_fleet_runtimes(
                 f"{drone_id}"
             )
 
-        if initial_optic_fiber_m < 0:
+        if (
+            initial_optic_fiber_m
+            is not None
+            and initial_optic_fiber_m < 0
+        ):
 
             raise ValueError(
                 "initial_optic_fiber_m cannot "
@@ -213,40 +347,17 @@ def build_fleet_runtimes(
         # =================================================
 
         drone = Drone(
-            drone_id=drone_id,
-
-            battalion_id=(
-                fleet_config[
-                    "battalion_id"
-                ]
-            ),
-
-            latitude=initial_latitude,
-            longitude=initial_longitude,
-
-            altitude_m=(
-                base_position[
-                    "altitude_m"
-                ]
-            ),
-
-            ground_speed_mps=0.0,
-
-            vertical_speed_mps=0.0,
-
-            heading_deg=(
-                movement[
-                    "heading_deg"
-                ]
-            ),
-
-            battery_pct=(
-                initial_battery_pct
-            ),
-
-            optic_fiber_remaining_m=(
-                initial_optic_fiber_m
-            ),
+            drone_id = drone_id,
+            battalion_id = fleet_config["battalion_id"],
+            latitude = initial_latitude,
+            longitude = initial_longitude,
+            altitude_m = base_position["altitude_m"],
+            ground_speed_mps = 0.0,
+            vertical_speed_mps = 0.0,
+            heading_deg = movement["heading_deg"],
+            battery_pct = initial_battery_pct,
+            communication_mode = communication_mode,
+            optic_fiber_remaining_m = initial_optic_fiber_m,
         )
 
         # =================================================

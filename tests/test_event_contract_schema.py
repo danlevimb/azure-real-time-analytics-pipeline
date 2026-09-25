@@ -3,7 +3,7 @@ import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
+from jsonschema import (Draft202012Validator, ValidationError,)
 
 from simulator.domain.drone import Drone
 from simulator.domain.mission import Mission
@@ -123,6 +123,137 @@ class TestEventContractSchemas(unittest.TestCase):
             self._schema("1.1")
         ).validate(event)
 
+    def test_v1_2_rf_telemetry_validates(
+        self,
+    ):
+
+        drone = self._drone()
+
+        drone.communication_mode = "RF"
+        drone.optic_fiber_remaining_m = None
+
+        event = EventFactory.telemetry(
+            drone=drone,
+            mission=self._mission(),
+            event_time=self._time(),
+            schema_version="1.2",
+            simulator_run_id="RUN-001",
+            scenario="baseline",
+            seed=20260922,
+        )
+
+        Draft202012Validator(
+            self._schema("1.2")
+        ).validate(event)
+
+    def test_v1_2_fiber_telemetry_validates(
+        self,
+    ):
+
+        drone = self._drone()
+
+        drone.communication_mode = "FIBER"
+        drone.optic_fiber_remaining_m = 8421.5
+
+        event = EventFactory.telemetry(
+            drone=drone,
+            mission=self._mission(),
+            event_time=self._time(),
+            schema_version="1.2",
+            simulator_run_id="RUN-001",
+            scenario="baseline",
+            seed=20260922,
+        )
+
+        Draft202012Validator(
+            self._schema("1.2")
+        ).validate(event)
+
+    def test_v1_2_rejects_rf_with_fiber_value(
+        self,
+    ):
+
+        drone = self._drone()
+
+        drone.communication_mode = "RF"
+        drone.optic_fiber_remaining_m = None
+
+        event = EventFactory.telemetry(
+            drone=drone,
+            mission=self._mission(),
+            event_time=self._time(),
+            schema_version="1.2",
+            simulator_run_id="RUN-001",
+            scenario="baseline",
+            seed=20260922,
+        )
+
+        event["payload"][
+            "consumables"
+        ][
+            "optic_fiber_remaining_m"
+        ] = 5000.0
+
+        with self.assertRaises(
+            ValidationError
+        ):
+
+            Draft202012Validator(
+                self._schema("1.2")
+            ).validate(event)
+
+    def test_v1_2_rejects_fiber_with_null_spool(
+        self,
+    ):
+
+        drone = self._drone()
+
+        drone.communication_mode = "FIBER"
+        drone.optic_fiber_remaining_m = 8421.5
+
+        event = EventFactory.telemetry(
+            drone=drone,
+            mission=self._mission(),
+            event_time=self._time(),
+            schema_version="1.2",
+            simulator_run_id="RUN-001",
+            scenario="baseline",
+            seed=20260922,
+        )
+
+        event["payload"][
+            "consumables"
+        ][
+            "optic_fiber_remaining_m"
+        ] = None
+
+        with self.assertRaises(
+            ValidationError
+        ):
+
+            Draft202012Validator(
+                self._schema("1.2")
+            ).validate(event)
+
+    def test_v1_2_state_transition_validates(
+        self,
+    ):
+
+        event = EventFactory.state_transition(
+            drone=self._drone(),
+            mission=self._mission(),
+            event_time=self._time(),
+            schema_version="1.2",
+            simulator_run_id="RUN-001",
+            scenario="operational_failure",
+            seed=20260922,
+            state_domain="connection_state",
+            previous_state="CONNECTED",
+            new_state="DISCONNECTED",
+            reason_code="SIMULATED_LINK_LOSS",
+        )
+
+        Draft202012Validator(self._schema("1.2")).validate(event)
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 import time
 import argparse
@@ -116,6 +116,27 @@ def main() -> None:
     )
 
     simulation = config["simulation"]
+    
+    if (
+        simulation["start_time_utc"].
+        lower()
+        == "auto"
+    ):
+
+        resolved_start_time = (datetime.now(timezone.utc))
+
+        simulation["start_time_utc"] = (
+            resolved_start_time
+            .isoformat()
+            .replace("+00:00", "Z",)
+        )
+
+        print(
+            "[SIMULATION CLOCK] "
+            f"start_time_utc auto -> "
+            f"{simulation['start_time_utc']}"
+        )
+    
     telemetry_config = config["telemetry"]
     simulation_context = config["simulation_context"]
     observability = config["observability"]
@@ -174,11 +195,7 @@ def main() -> None:
         )
     )
     
-    connectivity_scenario = (
-        ConnectivityScenario.from_config(
-            config
-        )
-    )
+    connectivity_scenario = (ConnectivityScenario.from_config(config))
     
     duplicate_targets = {
         (
@@ -245,14 +262,11 @@ def main() -> None:
     wall_tick_seconds = tick_seconds / speed_multiplier
 
     clock = SimulationClock(
-        start_time=datetime.fromisoformat(
-            simulation[
-                "start_time_utc"
-            ]
-        ),
-
-        tick_seconds=tick_seconds,
-    )
+    start_time=(
+        datetime.fromisoformat(simulation["start_time_utc"].replace("Z", "+00:00",))
+    ),
+    tick_seconds=tick_seconds,
+)
 
     # =====================================================
     # Fleet runtimes

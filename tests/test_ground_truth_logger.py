@@ -30,6 +30,8 @@ class TestGroundTruthLogger(unittest.TestCase):
             ground_speed_mps=20.0,
             vertical_speed_mps=0.0,
             heading_deg=45.0,
+            communication_mode="FIBER",
+            optic_fiber_remaining_m=10000.0,
         )
 
         mission = Mission(

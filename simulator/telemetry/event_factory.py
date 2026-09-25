@@ -159,7 +159,10 @@ class EventFactory:
             },
         }
 
-        if schema_version == "1.1":
+        if schema_version in {
+            "1.1",
+            "1.2",
+        }:
 
             event["payload"][
                 "consumables"
@@ -168,6 +171,51 @@ class EventFactory:
                     drone.optic_fiber_remaining_m
                 ),
             }
+
+
+        if schema_version == "1.2":
+
+            communication_mode = (
+                drone.communication_mode
+            )
+
+            if communication_mode not in {
+                "RF",
+                "FIBER",
+            }:
+
+                raise ValueError(
+                    "Event Contract v1.2 requires "
+                    "communication_mode RF or FIBER"
+                )
+
+            if (
+                communication_mode == "RF"
+                and drone.optic_fiber_remaining_m
+                is not None
+            ):
+
+                raise ValueError(
+                    "RF drone cannot expose "
+                    "optic_fiber_remaining_m"
+                )
+
+            if (
+                communication_mode == "FIBER"
+                and drone.optic_fiber_remaining_m
+                is None
+            ):
+
+                raise ValueError(
+                    "FIBER drone requires "
+                    "optic_fiber_remaining_m"
+                )
+
+            event["payload"][
+                "communications"
+            ][
+                "communication_mode"
+            ] = communication_mode
 
         return event
 

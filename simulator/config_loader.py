@@ -3,7 +3,6 @@ from pathlib import Path
 import re
 import yaml
 
-
 REQUIRED_BASE_SECTIONS = (
     "simulation",
     "simulation_context",
@@ -24,7 +23,6 @@ ALLOWED_TOP_LEVEL_SECTIONS = set(
     "publishers",
     "connectivity_scenario"
 }
-
 def _reject_unknown_keys(
     mapping: dict,
     *,
@@ -46,7 +44,6 @@ def _reject_unknown_keys(
             f"key(s): {unknown}"
         )
 
-
 def _require_mapping(
     value,
     *,
@@ -61,7 +58,6 @@ def _require_mapping(
         raise ValueError(f"{path} must be a mapping")
 
     return value
-
 
 def _require_non_empty_string(
     value,
@@ -83,7 +79,6 @@ def _require_non_empty_string(
         )
 
     return value
-
 
 def _validate_coordinates(
     *,
@@ -131,7 +126,6 @@ def _validate_coordinates(
             f"{path}.longitude must be "
             "between -180 and 180"
         )
-
 
 def _validate_operational_profile(
     profile: dict,
@@ -201,7 +195,6 @@ def _validate_operational_profile(
             f"{path}.initial_optic_fiber_m "
             "cannot be negative"
         )
-
 
 def _validate_target_rules(
     rules: list,
@@ -315,6 +308,89 @@ def _validate_target_rules(
 
     return seen_targets
 
+def _validate_communications(
+    communications: dict,
+    *,
+    path: str,
+) -> str:
+
+    _reject_unknown_keys(
+        communications,
+        allowed={
+            "mode",
+            "initial_optic_fiber_m",
+        },
+        path=path,
+    )
+
+    mode = (
+        _require_non_empty_string(
+            communications.get(
+                "mode"
+            ),
+            path=f"{path}.mode",
+        )
+        .upper()
+    )
+
+    if mode not in {
+        "RF",
+        "FIBER",
+    }:
+
+        raise ValueError(
+            f"{path}.mode must be "
+            "RF or FIBER"
+        )
+
+    has_fiber_capacity = (
+        "initial_optic_fiber_m"
+        in communications
+    )
+
+    if (
+        mode == "RF"
+        and has_fiber_capacity
+    ):
+
+        raise ValueError(
+            f"{path}.initial_optic_fiber_m "
+            "is not valid for RF drones"
+        )
+
+    if (
+        mode == "FIBER"
+        and not has_fiber_capacity
+    ):
+
+        raise ValueError(
+            f"{path}.initial_optic_fiber_m "
+            "is required for FIBER drones"
+        )
+
+    if mode == "FIBER":
+
+        initial_optic_fiber_m = (
+            communications[
+                "initial_optic_fiber_m"
+            ]
+        )
+
+        if (
+            not isinstance(
+                initial_optic_fiber_m,
+                (int, float),
+            )
+            or initial_optic_fiber_m < 0
+        ):
+
+            raise ValueError(
+                f"{path}."
+                "initial_optic_fiber_m "
+                "must be >= 0"
+            )
+
+    return mode
 
 def load_config(
     config_path: Path,
@@ -327,16 +403,25 @@ def load_config(
         encoding="utf-8",
     ) as file:
 
-        config = yaml.safe_load(
-            file
-        )
+        config = yaml.safe_load(file)
 
     if not config:
 
-        raise ValueError(
-            "Configuration file is empty."
-        )
+        raise ValueError("Configuration file is empty.")
 
+    config_version = str(config.get("config_version", "1.0",))
+
+    if config_version not in {
+        "1.0",
+        "1.1",
+        "1.2",
+    }:
+
+        raise ValueError(
+            "config_version must be "
+            "one of: 1.0, 1.1, 1.2"
+        )
+    
     _require_mapping(
         config,
         path="configuration",
@@ -443,30 +528,36 @@ def load_config(
 
     start_time_utc = (
         _require_non_empty_string(
-            simulation.get(
-                "start_time_utc"
-            ),
-            path=(
-                "simulation.start_time_utc"
-            ),
+            simulation.get("start_time_utc"), path=("simulation.start_time_utc"),
         )
     )
 
-    try:
+    if start_time_utc.lower() != "auto":
 
-        datetime.fromisoformat(
-            start_time_utc.replace(
-                "Z",
-                "+00:00",
+        try:
+
+            parsed_start_time = (
+                datetime.fromisoformat(
+                    start_time_utc.replace(
+                        "Z",
+                        "+00:00",
+                    )
+                )
             )
-        )
 
-    except ValueError as exc:
+        except ValueError as exc:
 
-        raise ValueError(
-            "simulation.start_time_utc "
-            "must be ISO-8601"
-        ) from exc
+            raise ValueError(
+                "simulation.start_time_utc "
+                "must be ISO-8601 or 'auto'"
+            ) from exc
+
+        if parsed_start_time.tzinfo is None:
+
+            raise ValueError(
+                "simulation.start_time_utc "
+                "must include timezone information"
+            )
 
     # =====================================================
     # Simulation context
@@ -564,6 +655,26 @@ def load_config(
         config["drone"],
         path="drone",
     )
+
+    if config_version == "1.2":
+
+        communications = (
+            _require_mapping(
+                drone.get(
+                    "communications"
+                ),
+                path=(
+                    "drone.communications"
+                ),
+            )
+        )
+
+        _validate_communications(
+            communications,
+            path=(
+                "drone.communications"
+            ),
+        )
 
     initial_position = (
         _require_mapping(
@@ -673,6 +784,21 @@ def load_config(
             "drone.operational_profile"
         ),
     )
+
+    if (
+        config_version == "1.2"
+        and "initial_optic_fiber_m"
+        in drone.get(
+            "operational_profile",
+            {},
+        )
+    ):
+
+        raise ValueError(
+            "For config_version 1.2, "
+            "initial_optic_fiber_m belongs "
+            "under drone.communications"
+        )
 
     # =====================================================
     # Mission
@@ -926,13 +1052,34 @@ def load_config(
     if schema_version not in {
         "1.0",
         "1.1",
+        "1.2",
     }:
 
         raise ValueError(
             "telemetry.schema_version must "
-            "be one of: 1.0, 1.1"
+            "be one of: 1.0, 1.1, 1.2"
         )
 
+    if (
+        config_version == "1.2"
+        and schema_version != "1.2"
+    ):
+
+        raise ValueError(
+            "config_version 1.2 requires "
+            "telemetry.schema_version 1.2"
+        )
+
+
+    if (
+        schema_version == "1.2"
+        and config_version != "1.2"
+    ):
+
+        raise ValueError(
+            "telemetry.schema_version 1.2 "
+            "requires config_version 1.2"
+        )
 
     # =====================================================
     # Publishers
@@ -1241,12 +1388,7 @@ def load_config(
             members
         ):
 
-            _require_mapping(
-                member,
-                path=(
-                    f"fleet.members[{index}]"
-                ),
-            )
+            _require_mapping(member, path=(f"fleet.members[{index}]"),)
 
             drone_id = (
                 _require_non_empty_string(
@@ -1292,13 +1434,8 @@ def load_config(
                     f"{mission_id}"
                 )
 
-            fleet_drone_ids.add(
-                drone_id
-            )
-
-            fleet_mission_ids.add(
-                mission_id
-            )
+            fleet_drone_ids.add(drone_id)
+            fleet_mission_ids.add(mission_id)
 
             for offset_name in (
                 "latitude_offset",
@@ -1321,7 +1458,7 @@ def load_config(
                         "must be numeric"
                     )
 
-            _validate_operational_profile(
+            member_operational_profile = (
                 _require_mapping(
                     member.get(
                         "operational_profile",
@@ -1331,12 +1468,64 @@ def load_config(
                         f"fleet.members[{index}]."
                         "operational_profile"
                     ),
-                ),
+                )
+            )
+
+            _validate_operational_profile(
+                member_operational_profile,
                 path=(
                     f"fleet.members[{index}]."
                     "operational_profile"
                 ),
             )
+
+            if config_version == "1.2":
+
+                # =============================================
+                # v1.2:
+                # Fiber no longer belongs to operational_profile.
+                # =============================================
+
+                if (
+                    "initial_optic_fiber_m"
+                    in member_operational_profile
+                ):
+
+                    raise ValueError(
+                        f"fleet.members[{index}]."
+                        "initial_optic_fiber_m belongs "
+                        "under communications for "
+                        "config_version 1.2"
+                    )
+
+                # =============================================
+                # Optional per-member communications override.
+                #
+                # If absent, the member inherits drone.communications.
+                # If present, it must be self-contained and valid.
+                # =============================================
+
+                if "communications" in member:
+
+                    member_communications = (
+                        _require_mapping(
+                            member[
+                                "communications"
+                            ],
+                            path=(
+                                f"fleet.members[{index}]."
+                                "communications"
+                            ),
+                        )
+                    )
+
+                    _validate_communications(
+                        member_communications,
+                        path=(
+                            f"fleet.members[{index}]."
+                            "communications"
+                        ),
+                    )
 
     # =====================================================
     # Transport
@@ -2086,3 +2275,4 @@ def load_config(
                 ),
             )
     return config
+

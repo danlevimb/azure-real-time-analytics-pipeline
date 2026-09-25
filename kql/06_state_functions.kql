@@ -127,8 +127,20 @@ LatestTelemetryObservation(p_RunId:string) {
             | take 1 
         )
         | project 
-            simulator_run_id, drone_id, battalion_id, mission_id, 
-            telemetry_as_of = event_time, telemetry_ingested_at = bronze_ingested_at, telemetry_sequence_number = source_sequence_number,
-            latitude, longitude, altitude_m, ground_speed_mps, vertical_speed_mps, heading_deg,
-            battery_pct, optic_fiber_remaining_m
+            simulator_run_id,
+            drone_id,
+            battalion_id,
+            mission_id,
+            telemetry_as_of = event_time,
+            telemetry_ingested_at = bronze_ingested_at,
+            telemetry_sequence_number = source_sequence_number,
+            latitude,
+            longitude,
+            altitude_m,
+            ground_speed_mps,
+            vertical_speed_mps,
+            heading_deg,
+            battery_pct,
+            communication_mode,
+            optic_fiber_remaining_m
 }

@@ -38,6 +38,8 @@
 //     battery_pct:real,
 //     platform_health:string,
 //     connection_state:string,
+//     communication_mode:string,
+//     optic_fiber_remaining_m:real,
 //     asset_state:string,
 //     mission_status:string,
 //     mission_phase:string,

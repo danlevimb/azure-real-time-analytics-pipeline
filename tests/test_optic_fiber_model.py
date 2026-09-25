@@ -6,47 +6,80 @@ from simulator.simulation.optic_fiber_model import (
 )
 
 
-class TestOpticFiberModel(unittest.TestCase):
+class TestOpticFiberModel(
+    unittest.TestCase
+):
 
-    @staticmethod
     def _drone(
-        remaining_m: float = 1000.0,
-    ) -> Drone:
+        self,
+        *,
+        communication_mode,
+        fiber,
+    ):
 
         return Drone(
-            drone_id="DRN-001",
-            battalion_id="BTN-01",
-            latitude=72.0,
-            longitude=-40.0,
-            altitude_m=120.0,
-            ground_speed_mps=20.0,
-            heading_deg=45.0,
-            optic_fiber_remaining_m=remaining_m,
+            drone_id="DRN-TEST",
+            battalion_id="BTN-TEST",
+            latitude=0.0,
+            longitude=0.0,
+            altitude_m=0.0,
+            ground_speed_mps=0.0,
+            heading_deg=0.0,
+            communication_mode=(
+                communication_mode
+            ),
+            optic_fiber_remaining_m=fiber,
         )
 
-    def test_distance_consumes_same_amount_of_fiber(self):
-
-        drone = self._drone()
-
-        remaining = update_optic_fiber(
-            drone=drone,
-            distance_travelled_m=25.5,
-        )
-
-        self.assertAlmostEqual(
-            remaining,
-            974.5,
-        )
-
-    def test_fiber_never_goes_below_zero(self):
+    def test_rf_drone_does_not_consume_fiber(
+        self,
+    ):
 
         drone = self._drone(
-            remaining_m=10.0,
+            communication_mode="RF",
+            fiber=None,
         )
 
         update_optic_fiber(
             drone=drone,
-            distance_travelled_m=15.0,
+            distance_travelled_m=500.0,
+        )
+
+        self.assertIsNone(
+            drone.optic_fiber_remaining_m
+        )
+
+    def test_fiber_drone_consumes_distance(
+        self,
+    ):
+
+        drone = self._drone(
+            communication_mode="FIBER",
+            fiber=10000.0,
+        )
+
+        update_optic_fiber(
+            drone=drone,
+            distance_travelled_m=500.0,
+        )
+
+        self.assertEqual(
+            drone.optic_fiber_remaining_m,
+            9500.0,
+        )
+
+    def test_fiber_drone_cannot_go_below_zero(
+        self,
+    ):
+
+        drone = self._drone(
+            communication_mode="FIBER",
+            fiber=100.0,
+        )
+
+        update_optic_fiber(
+            drone=drone,
+            distance_travelled_m=500.0,
         )
 
         self.assertEqual(
@@ -54,15 +87,41 @@ class TestOpticFiberModel(unittest.TestCase):
             0.0,
         )
 
-    def test_negative_distance_fails(self):
+    def test_fiber_drone_requires_spool(
+        self,
+    ):
 
-        with self.assertRaises(ValueError):
+        drone = self._drone(
+            communication_mode="FIBER",
+            fiber=None,
+        )
+
+        with self.assertRaises(
+            ValueError
+        ):
 
             update_optic_fiber(
-                drone=self._drone(),
-                distance_travelled_m=-1.0,
+                drone=drone,
+                distance_travelled_m=1.0,
             )
 
+    def test_negative_distance_fails(
+        self,
+    ):
+
+        drone = self._drone(
+            communication_mode="FIBER",
+            fiber=1000.0,
+        )
+
+        with self.assertRaises(
+            ValueError
+        ):
+
+            update_optic_fiber(
+                drone=drone,
+                distance_travelled_m=-1.0,
+            )
 
 if __name__ == "__main__":
     unittest.main()

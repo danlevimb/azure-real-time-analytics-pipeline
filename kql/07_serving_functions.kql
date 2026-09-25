@@ -11,7 +11,7 @@ FleetOperationalView(p_RunId:string) {
             asset_state, connection_state,
             mission_phase, mission_status, platform_health, 
             latitude, longitude, altitude_m, ground_speed_mps, vertical_speed_mps, heading_deg,
-            battery_pct, optic_fiber_remaining_m,
+            battery_pct, communication_mode, optic_fiber_remaining_m,
             telemetry_as_of, state_as_of, telemetry_state_gap_ms, telemetry_ingested_at
 }
 
@@ -94,10 +94,14 @@ CurrentFleetMapView() {
     | extend telemetry_age_ms = datetime_diff("millisecond", now(), telemetry_ingested_at)
     | extend telemetry_age_sec = round(todouble(telemetry_age_ms) / 1000.0, 1)
     | project 
-        drone_id, battalion_id, mission_id, 
-        latitude, longitude, altitude_m, heading_deg, ground_speed_mps, vertical_speed_mps,
-        battery_pct, optic_fiber_remaining_m,
-        asset_state, connection_state, mission_phase, mission_status, platform_health,
+        drone_id, 
+        battalion_id, mission_id, 
+        latitude, longitude, altitude_m, heading_deg,
+        ground_speed_mps, vertical_speed_mps,
+        battery_pct, communication_mode, optic_fiber_remaining_m,
+        asset_state, connection_state,
+        mission_phase, mission_status,
+        platform_health,
         telemetry_as_of, telemetry_ingested_at, telemetry_age_sec, state_as_of
     | order by drone_id asc
 }

@@ -1,15 +1,9 @@
 import copy
 import tempfile
 import unittest
-
 from pathlib import Path
-
 import yaml
-
-from simulator.config_loader import (
-    load_config,
-)
-
+from simulator.config_loader import (load_config,)
 
 class TestFleetConfigValidation(
     unittest.TestCase
@@ -233,7 +227,6 @@ class TestFleetConfigValidation(
                 config
             )
 
-
     def test_negative_optic_fiber_fails(
         self,
     ):
@@ -324,29 +317,8 @@ class TestFleetConfigValidation(
                 40,
         }
 
-        config[
-            "transport"
-        ][
-            "fault_injection"
-        ][
-            "duplicate_targets"
-        ] = [
-            dict(
-                target
-            )
-        ]
-
-        config[
-            "transport"
-        ][
-            "fault_injection"
-        ][
-            "drop_targets"
-        ] = [
-            dict(
-                target
-            )
-        ]
+        config["transport"]["fault_injection"]["duplicate_targets"] = [dict(target)]
+        config["transport"]["fault_injection"]["drop_targets"] = [dict(target)]
 
         with self.assertRaises(
             ValueError
@@ -443,6 +415,342 @@ class TestFleetConfigValidation(
                 config
             )
 
+    def test_start_time_auto_is_valid(
+        self,
+    ):
+
+        config = copy.deepcopy(
+            self.base_config
+        )
+
+        config[
+            "simulation"
+        ][
+            "start_time_utc"
+        ] = "auto"
+
+        loaded = self._load_mutated(
+            config
+        )
+
+        self.assertEqual(
+            loaded[
+                "simulation"
+            ][
+                "start_time_utc"
+            ],
+            "auto",
+        )
+
+    def test_invalid_start_time_is_rejected(
+        self,
+    ):
+
+        config = copy.deepcopy(
+            self.base_config
+        )
+
+        config[
+            "simulation"
+        ][
+            "start_time_utc"
+        ] = (
+            "mañana-como-a-las-tres"
+        )
+
+        with self.assertRaises(
+            ValueError
+        ):
+
+            self._load_mutated(
+                config
+            )
+
+    def test_v1_2_accepts_rf_communications(
+        self,
+    ):
+
+        config = copy.deepcopy(self.base_config)
+
+        config["config_version"] = "1.2"
+        config["telemetry"]["schema_version"] = "1.2"
+        config["drone"]["communications"] = {"mode": "RF",}
+        config["drone"]["operational_profile"].pop("initial_optic_fiber_m",None,)
+
+        loaded = self._load_mutated(config)
+
+        self.assertEqual(
+            loaded["drone"][
+                "communications"
+            ][
+                "mode"
+            ],
+            "RF",
+        )
+
+    def test_v1_2_rejects_fiber_on_rf_drone(
+        self,
+    ):
+
+        config = copy.deepcopy(self.base_config)
+        config["config_version"] = "1.2"
+        config["telemetry"]["schema_version"] = "1.2"
+        config["drone"]["communications"] = {"mode": "RF","initial_optic_fiber_m": (10000.0),}
+
+        with self.assertRaises(
+            ValueError
+        ):
+
+            self._load_mutated(
+                config
+            )
+
+    def test_v1_2_requires_fiber_capacity_for_fiber_drone(
+        self,
+    ):
+
+        config = copy.deepcopy(
+            self.base_config
+        )
+
+        config["config_version"] = "1.2"
+        config["telemetry"]["schema_version"] = "1.2"
+
+        config["drone"][
+            "communications"
+        ] = {
+            "mode": "FIBER",
+        }
+
+        with self.assertRaises(
+            ValueError
+        ):
+
+            self._load_mutated(
+                config
+            )
+
+    def test_v1_2_accepts_member_fiber_override(
+        self,
+    ):
+
+        config = copy.deepcopy(
+            self.base_config
+        )
+
+        config["config_version"] = "1.2"
+        config["telemetry"]["schema_version"] = "1.2"
+
+        config["drone"][
+            "communications"
+        ] = {
+            "mode": "RF",
+        }
+
+        config["drone"][
+            "operational_profile"
+        ].pop(
+            "initial_optic_fiber_m",
+            None,
+        )
+
+        config["fleet"][
+            "members"
+        ][1][
+            "communications"
+        ] = {
+            "mode": "FIBER",
+            "initial_optic_fiber_m": 7500.0,
+        }
+
+        loaded = self._load_mutated(
+            config
+        )
+
+        self.assertEqual(
+            loaded["fleet"][
+                "members"
+            ][1][
+                "communications"
+            ][
+                "mode"
+            ],
+            "FIBER",
+        )
+
+    def test_v1_2_rejects_fiber_on_rf_member(
+        self,
+    ):
+
+        config = copy.deepcopy(
+            self.base_config
+        )
+
+        config["config_version"] = "1.2"        
+        config["telemetry"]["schema_version"] = "1.2"
+        config["drone"]["communications"] = {"mode": "RF",}
+        config["drone"]["operational_profile"].pop("initial_optic_fiber_m",None,)
+
+        config["fleet"][
+            "members"
+        ][1][
+            "communications"
+        ] = {
+            "mode": "RF",
+            "initial_optic_fiber_m": 7500.0,
+        }
+
+        with self.assertRaises(
+            ValueError
+        ):
+
+            self._load_mutated(
+                config
+            )
+
+    def test_v1_2_requires_spool_for_fiber_member(
+        self,
+    ):
+
+        config = copy.deepcopy(
+            self.base_config
+        )
+
+        config["config_version"] = "1.2"
+        config["telemetry"]["schema_version"] = "1.2"
+
+        config["drone"][
+            "communications"
+        ] = {
+            "mode": "RF",
+        }
+
+        config["drone"][
+            "operational_profile"
+        ].pop(
+            "initial_optic_fiber_m",
+            None,
+        )
+
+        config["fleet"][
+            "members"
+        ][1][
+            "communications"
+        ] = {
+            "mode": "FIBER",
+        }
+
+        with self.assertRaises(
+            ValueError
+        ):
+
+            self._load_mutated(
+                config
+            )
+
+    def test_v1_2_rejects_legacy_fiber_in_member_operational_profile(
+        self,
+    ):
+
+        config = copy.deepcopy(self.base_config)
+
+        config["config_version"] = "1.2"
+        config["telemetry"]["schema_version"] = "1.2"
+
+        config["drone"][
+            "communications"
+        ] = {
+            "mode": "RF",
+        }
+
+        config["drone"][
+            "operational_profile"
+        ].pop(
+            "initial_optic_fiber_m",
+            None,
+        )
+
+        config["fleet"][
+            "members"
+        ][1][
+            "operational_profile"
+        ][
+            "initial_optic_fiber_m"
+        ] = 7500.0
+
+        with self.assertRaises(
+            ValueError
+        ):
+
+            self._load_mutated(
+                config
+            )
+
+    def test_v1_2_accepts_schema_version_1_2(
+        self,
+    ):
+
+        config = copy.deepcopy(
+            self.base_config
+        )
+
+        config["config_version"] = "1.2"
+        config["telemetry"]["schema_version"] = "1.2"
+
+        config["telemetry"][
+            "schema_version"
+        ] = "1.2"
+
+        config["drone"][
+            "communications"
+        ] = {
+            "mode": "RF",
+        }
+
+        config["drone"][
+            "operational_profile"
+        ].pop(
+            "initial_optic_fiber_m",
+            None,
+        )
+
+        loaded = self._load_mutated(
+            config
+        )
+
+        self.assertEqual(
+            loaded["telemetry"][
+                "schema_version"
+            ],
+            "1.2",
+        )
+
+    def test_v1_2_rejects_schema_version_1_1(
+        self,
+    ):
+
+        config = copy.deepcopy(
+            self.base_config
+        )
+
+        config["config_version"] = "1.2"
+        config["telemetry"]["schema_version"] = "1.1"
+        config["drone"]["communications"] = {"mode": "RF",}
+
+        config["drone"][
+            "operational_profile"
+        ].pop(
+            "initial_optic_fiber_m",
+            None,
+        )
+
+        with self.assertRaises(
+            ValueError
+        ):
+
+            self._load_mutated(
+                config
+            )
 
 if __name__ == "__main__":
     unittest.main()

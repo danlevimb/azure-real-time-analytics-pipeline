@@ -1,0 +1,73 @@
+// ============================================================
+// Event Contract v1.2 migration
+//
+// Adds:
+//   communication_mode = RF | FIBER
+//
+// RF:
+//   optic_fiber_remaining_m = null
+//
+// FIBER:
+//   optic_fiber_remaining_m = numeric
+//
+// RawDroneEvents remains unchanged because payload is dynamic.
+// ============================================================
+
+
+// ------------------------------------------------------------
+// 1. Extend Silver parsed schema
+// ------------------------------------------------------------
+
+.alter-merge table TelemetryParsed (
+    communication_mode:string
+)
+
+
+// ------------------------------------------------------------
+// 2. Keep canonical schema synchronized with TelemetryParsed
+// ------------------------------------------------------------
+
+.alter materialized-view TelemetryCanonical autoUpdateSchema true
+
+
+// ------------------------------------------------------------
+// 3. Update telemetry parser for Event Contract v1.2
+// ------------------------------------------------------------
+
+.create-or-alter function 
+with (
+    folder = "Silver/Transforms", 
+    docstring = "Parse Event Contract v1.0/v1.1/v1.2 telemetry events from RawDroneEvents", 
+    skipvalidation = "true")    
+TransformTelemetry() {
+    RawDroneEvents
+    | where event_type == "telemetry"
+    | project
+        schema_version          = tostring(schema_version),
+        event_id                = tostring(event_id),
+        event_time              = event_time,
+        drone_id                = tostring(drone_id),
+        battalion_id            = tostring(battalion_id),
+        mission_id              = tostring(mission_id),
+        source_sequence_number  = tolong(source_sequence_number),
+        source_type             = tostring(source_type),
+        source_gateway_id       = tostring(source_gateway_id),
+        simulator_run_id        = tostring(simulation.simulator_run_id),
+        scenario                = tostring(simulation.scenario),
+        seed                    = tolong(simulation.seed),
+        latitude                = todouble(payload.position.latitude),
+        longitude               = todouble(payload.position.longitude),
+        altitude_m              = todouble(payload.position.altitude_m),
+        ground_speed_mps        = todouble(payload.movement.ground_speed_mps),
+        vertical_speed_mps      = todouble(payload.movement.vertical_speed_mps),
+        heading_deg             = todouble(payload.movement.heading_deg),
+        battery_pct             = todouble(payload.power.battery_pct),
+        platform_health         = tostring(payload.health.platform_health),
+        connection_state        = tostring(payload.communications.connection_state),
+        asset_state             = tostring(payload.operations.asset_state),
+        mission_status          = tostring(payload.operations.mission_status),
+        mission_phase           = tostring(payload.operations.mission_phase),
+        bronze_ingested_at      = ingestion_time(),
+        optic_fiber_remaining_m = todouble(payload.consumables.optic_fiber_remaining_m),
+        communication_mode      = tostring(payload.communications.communication_mode)
+}
