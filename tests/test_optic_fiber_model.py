@@ -1,39 +1,25 @@
 import unittest
 
 from simulator.domain.drone import Drone
-from simulator.simulation.optic_fiber_model import (
-    update_optic_fiber,
-)
+from simulator.simulation.optic_fiber_model import (update_optic_fiber, did_optic_fiber_exhaust,)
 
+class TestOpticFiberModel(unittest.TestCase):
 
-class TestOpticFiberModel(
-    unittest.TestCase
-):
-
-    def _drone(
-        self,
-        *,
-        communication_mode,
-        fiber,
-    ):
+    def _drone(self, *, communication_mode, fiber,):
 
         return Drone(
-            drone_id="DRN-TEST",
-            battalion_id="BTN-TEST",
-            latitude=0.0,
-            longitude=0.0,
-            altitude_m=0.0,
-            ground_speed_mps=0.0,
-            heading_deg=0.0,
-            communication_mode=(
-                communication_mode
-            ),
-            optic_fiber_remaining_m=fiber,
+            drone_id = "DRN-TEST",
+            battalion_id = "BTN-TEST",
+            latitude = 0.0,
+            longitude = 0.0,
+            altitude_m = 0.0,
+            ground_speed_mps = 0.0,
+            heading_deg = 0.0,
+            communication_mode = communication_mode,
+            optic_fiber_remaining_m = fiber,
         )
 
-    def test_rf_drone_does_not_consume_fiber(
-        self,
-    ):
+    def test_rf_drone_does_not_consume_fiber(self,):
 
         drone = self._drone(
             communication_mode="RF",
@@ -122,6 +108,66 @@ class TestOpticFiberModel(
                 drone=drone,
                 distance_travelled_m=-1.0,
             )
+
+    def test_fiber_exhaustion_is_detected_on_transition_to_zero(
+        self,
+    ):
+
+        drone = self._drone(
+            communication_mode="FIBER",
+            fiber=100.0,
+        )
+
+        previous_remaining_m = (
+            drone.optic_fiber_remaining_m
+        )
+
+        update_optic_fiber(
+            drone=drone,
+            distance_travelled_m=150.0,
+        )
+
+        self.assertTrue(
+            did_optic_fiber_exhaust(
+                drone=drone,
+                previous_remaining_m=(
+                    previous_remaining_m
+                ),
+            )
+        )
+
+
+    def test_fiber_exhaustion_is_not_repeated_once_at_zero(
+        self,
+    ):
+
+        drone = self._drone(
+            communication_mode="FIBER",
+            fiber=100.0,
+        )
+
+        update_optic_fiber(
+            drone=drone,
+            distance_travelled_m=150.0,
+        )
+
+        previous_remaining_m = (
+            drone.optic_fiber_remaining_m
+        )
+
+        update_optic_fiber(
+            drone=drone,
+            distance_travelled_m=50.0,
+        )
+
+        self.assertFalse(
+            did_optic_fiber_exhaust(
+                drone=drone,
+                previous_remaining_m=(
+                    previous_remaining_m
+                ),
+            )
+        )
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,42 +1,23 @@
 from dataclasses import dataclass, field
 
 from simulator.domain.drone import Drone
-from simulator.domain.mission import (
-    Mission,
-    MissionPhase,
-    MissionStatus,
-)
-from simulator.domain.route import RouteInstance
-from simulator.domain.states.mission_state_machine import (
-    MissionStateMachine,
-)
-from simulator.simulation.geodesy import (
-    destination_point,
-)
-from simulator.simulation.movement_engine import (
-    MovementEngine,
-)
-
+from simulator.domain.mission import (Mission, MissionPhase, MissionStatus,)
+from simulator.domain.route import (RouteInstance, Waypoint,)
+from simulator.domain.states.mission_state_machine import (MissionStateMachine,)
+from simulator.simulation.geodesy import (destination_point,)
+from simulator.simulation.movement_engine import (MovementEngine,)
 
 @dataclass
 class MissionUpdateResult:
     previous_phase: MissionPhase | None = None
     new_phase: MissionPhase | None = None
-
-    reached_waypoints: list[str] = field(
-        default_factory=list
-    )
-
+    reached_waypoints: list[str] = field(default_factory=list)
     distance_travelled_m: float = 0.0
-
 
 class MissionEngine:
 
     @staticmethod
-    def start(
-        mission: Mission,
-        drone: Drone,
-    ) -> None:
+    def start(mission: Mission,drone: Drone,) -> None:
 
         if mission.phase != MissionPhase.READY:
             raise ValueError(
@@ -62,10 +43,7 @@ class MissionEngine:
         )
 
     @staticmethod
-    def _initialize_orbit(
-        mission: Mission,
-        drone: Drone,
-    ) -> None:
+    def _initialize_orbit(mission: Mission,drone: Drone,) -> None:
 
         clockwise = (
             mission.orbit_direction.upper()
@@ -107,12 +85,77 @@ class MissionEngine:
         mission.orbit_elapsed_seconds = 0.0
 
     @staticmethod
+    def activate_autonomous_rtb(
+        *,
+        mission: Mission,
+        drone: Drone,
+        return_route: RouteInstance,
+    ) -> RouteInstance:
+
+        if mission.phase not in {
+            MissionPhase.EN_ROUTE,
+            MissionPhase.ON_MISSION,
+            MissionPhase.RETURNING,
+        }:
+            raise ValueError(
+                "AUTONOMOUS_RTB requires mission phase "
+                "EN_ROUTE, ON_MISSION or RETURNING"
+            )
+
+        if not return_route.waypoints:
+            raise ValueError(
+                "AUTONOMOUS_RTB requires a return route "
+                "with a base waypoint"
+            )
+
+        base_waypoint = (
+            return_route.waypoints[-1]
+        )
+
+        emergency_return_route = (
+            RouteInstance(
+                route_instance_id=(
+                    f"{return_route.route_instance_id}"
+                    "-AUTONOMOUS-RTB"
+                ),
+                waypoints=[
+                    Waypoint(
+                        waypoint_id=(
+                            base_waypoint.waypoint_id
+                        ),
+                        latitude=(
+                            base_waypoint.latitude
+                        ),
+                        longitude=(
+                            base_waypoint.longitude
+                        ),
+                    )
+                ],
+            )
+        )
+
+        if (
+            mission.phase
+            != MissionPhase.RETURNING
+        ):
+            MissionStateMachine.transition(
+                mission,
+                MissionPhase.RETURNING,
+            )
+
+        drone.vertical_speed_mps = 0.0
+        drone.ground_speed_mps = (
+            mission.cruise_speed_mps
+        )
+
+        return emergency_return_route
+
+    @staticmethod
     def update(
         mission: Mission,
         drone: Drone,
         route: RouteInstance,
-        dt_seconds: float,
-        return_route: RouteInstance | None = None,
+        dt_seconds: float, return_route: RouteInstance | None = None,
     ) -> MissionUpdateResult:
 
         result = MissionUpdateResult()

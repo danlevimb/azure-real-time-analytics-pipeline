@@ -38,7 +38,7 @@ from simulator.simulation.clock import (SimulationClock,)
 from simulator.simulation.fleet_factory import (build_fleet_runtimes,)
 from simulator.simulation.mission_engine import (MissionEngine,)
 from simulator.simulation.power_model import (update_battery,)
-from simulator.simulation.optic_fiber_model import (update_optic_fiber,)
+from simulator.simulation.optic_fiber_model import (update_optic_fiber, did_optic_fiber_exhaust,)
 from simulator.scenarios.maintenance_lifecycle import (MaintenanceLifecycleScenario,)
 from simulator.scenarios.connectivity import (ConnectivityScenario,)
 from simulator.telemetry.event_factory import (EventFactory,)
@@ -913,11 +913,19 @@ def main() -> None:
                 ),
             )
 
-            update_optic_fiber(
-                drone=drone,
-                distance_travelled_m=(
-                    result.distance_travelled_m
-                ),
+            previous_fiber_remaining_m = (
+                drone.optic_fiber_remaining_m
+            )
+
+            update_optic_fiber(drone=drone, distance_travelled_m=(result.distance_travelled_m),)
+
+            fiber_exhausted_now = (
+                did_optic_fiber_exhaust(
+                    drone=drone,
+                    previous_remaining_m=(
+                        previous_fiber_remaining_m
+                    ),
+                )
             )
 
             # ---------------------------------------------
@@ -1004,6 +1012,135 @@ def main() -> None:
                     f"{transition_event['source_sequence_number']:04d}"
                 )
 
+            # ---------------------------------------------
+            # Causal optic-fiber exhaustion
+            #
+            # This is not a timed fault injection.
+            # The link is lost only when a FIBER drone
+            # physically consumes the last remaining meter
+            # of its spool.
+            # ---------------------------------------------
+
+            if fiber_exhausted_now:
+
+                previous_connection_state = (drone.connection_state)
+
+                if (previous_connection_state != "DISCONNECTED"):
+
+                    drone.connection_state = "DISCONNECTED"
+
+                    fiber_exhaustion_event = (
+                        EventFactory.state_transition(
+                            drone = drone,
+                            mission = mission,
+                            event_time = clock.now,
+                            schema_version = telemetry_config["schema_version"],
+                            simulator_run_id = simulation_context["simulator_run_id"],
+                            scenario = simulation_context["scenario"],
+                            seed = simulation["seed"],
+                            state_domain = "connection_state",
+                            previous_state = previous_connection_state,
+                            new_state = "DISCONNECTED",
+                            reason_code = "FIBER_EXHAUSTED",
+                        )
+                    )
+
+                    route_generated_event(
+                        event = fiber_exhaustion_event,
+                        drone = drone,
+                        force_transmit = True,
+                    )
+
+                    print(
+                        f"[FIBER EXHAUSTED] "
+                        f"T+{clock.elapsed_seconds:05.2f}s "
+                        f"{drone.drone_id} "
+                        f"| remaining=0.0m "
+                        f"| {previous_connection_state} "
+                        f"-> DISCONNECTED "
+                        f"| seq="
+                        f"{fiber_exhaustion_event['source_sequence_number']:04d}"
+                    )
+
+                    previous_mission_phase = (
+                        mission.phase
+                    )
+
+                    runtime.return_route = (
+                        MissionEngine.activate_autonomous_rtb(
+                            mission=mission,
+                            drone=drone,
+                            return_route=(
+                                runtime.return_route
+                            ),
+                        )
+                    )
+
+                    if (mission.phase != previous_mission_phase):
+
+                        autonomous_rtb_event = (
+                            EventFactory.state_transition(
+                                drone=drone,
+                                mission=mission,
+                                event_time=clock.now,
+
+                                schema_version=(
+                                    telemetry_config[
+                                        "schema_version"
+                                    ]
+                                ),
+
+                                simulator_run_id=(
+                                    simulation_context[
+                                        "simulator_run_id"
+                                    ]
+                                ),
+
+                                scenario=(
+                                    simulation_context[
+                                        "scenario"
+                                    ]
+                                ),
+
+                                seed=(
+                                    simulation[
+                                        "seed"
+                                    ]
+                                ),
+
+                                state_domain=(
+                                    "mission_phase"
+                                ),
+
+                                previous_state=(
+                                    previous_mission_phase.value
+                                ),
+
+                                new_state=(
+                                    mission.phase.value
+                                ),
+
+                                reason_code=(
+                                    "AUTONOMOUS_RTB_FIBER_EXHAUSTED"
+                                ),
+                            )
+                        )
+
+                        route_generated_event(
+                            event=autonomous_rtb_event,
+                            drone=drone,
+                        )
+
+                        print(
+                            f"[FAILSAFE] "
+                            f"T+{clock.elapsed_seconds:05.2f}s "
+                            f"{drone.drone_id} "
+                            f"| AUTONOMOUS_RTB "
+                            f"| {previous_mission_phase.value} "
+                            f"-> {mission.phase.value} "
+                            f"| seq="
+                            f"{autonomous_rtb_event['source_sequence_number']:04d}"
+                        )
             # ---------------------------------------------
             # Optional maintenance lifecycle scenario
             #

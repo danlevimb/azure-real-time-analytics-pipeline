@@ -1,10 +1,6 @@
 from simulator.domain.drone import Drone
 
-def update_optic_fiber(
-    *,
-    drone: Drone,
-    distance_travelled_m: float,
-) -> None:
+def update_optic_fiber(*, drone: Drone, distance_travelled_m: float,) -> None:
 
     if distance_travelled_m < 0:
 
@@ -31,11 +27,7 @@ def update_optic_fiber(
 
     if drone.communication_mode == "FIBER":
 
-        if (
-            drone.optic_fiber_remaining_m
-            is None
-        ):
-
+        if drone.optic_fiber_remaining_m is None:
             raise ValueError(
                 "FIBER drone requires "
                 "optic_fiber_remaining_m"
@@ -50,14 +42,8 @@ def update_optic_fiber(
     # =====================================================
 
     elif drone.communication_mode is None:
-
-        if (
-            drone.optic_fiber_remaining_m
-            is None
-        ):
-
+        if drone.optic_fiber_remaining_m is None:
             return
-
     else:
 
         raise ValueError(
@@ -76,3 +62,17 @@ def update_optic_fiber(
     )
 
     return drone.optic_fiber_remaining_m
+
+
+def did_optic_fiber_exhaust(*, drone: Drone, previous_remaining_m: float | None,) -> bool:
+
+    return (
+        drone.communication_mode
+        == "FIBER"
+        and previous_remaining_m
+        is not None
+        and previous_remaining_m
+        > 0.0
+        and drone.optic_fiber_remaining_m
+        == 0.0
+    )

@@ -17,6 +17,7 @@ class MissionStateMachine:
 
         MissionPhase.EN_ROUTE: {
             MissionPhase.ON_MISSION,
+            MissionPhase.RETURNING, 
         },
 
         MissionPhase.ON_MISSION: {
