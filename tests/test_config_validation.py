@@ -843,42 +843,75 @@ class TestFleetConfigValidation(
 
         self.assertEqual(loaded["connectivity_scenario"]["fault_type"],"FIBER_LINK_LOSS",)
 
-    def test_v1_2_rejects_reconnect_for_fiber_cut(
-        self,
-    ):
+    def test_v1_2_rejects_reconnect_for_fiber_cut(self,):
 
-        config = copy.deepcopy(
-            self.base_config
-        )
-
+        config = copy.deepcopy(self.base_config)
         config["config_version"] = "1.2"
-        config["telemetry"][
-            "schema_version"
-        ] = "1.2"
-
-        config["drone"][
-            "communications"
-        ] = {
-            "mode": "RF",
-        }
-
-        config["drone"][
-            "operational_profile"
-        ].pop(
-            "initial_optic_fiber_m",
-            None,
-        )
-
+        config["telemetry"]["schema_version"] = "1.2"
+        config["drone"]["communications"] = {"mode": "RF",}
+        config["drone"]["operational_profile"].pop("initial_optic_fiber_m", None,)
         config["fleet"]["members"][1]["communications"] = {"mode": "FIBER","initial_optic_fiber_m": 7500.0,}
 
-        config[
-            "connectivity_scenario"
-        ] = {
+        config["connectivity_scenario"] = {
             "enabled": True,
             "target_drone_id": "DRN-002",
             "disconnect_at_seconds": 60.0,
             "reconnect_at_seconds": 80.0,
             "fault_type": "FIBER_CUT",
+        }
+
+        with self.assertRaises(
+            ValueError
+        ):
+            self._load_mutated(
+                config
+            )
+
+    def test_destruction_scenario_accepts_valid_target(self,):
+
+        config = copy.deepcopy(self.base_config)
+
+        config[
+            "destruction_scenario"
+        ] = {
+            "enabled": True,
+            "target_drone_id": "DRN-003",
+            "destroy_at_seconds": 38.0,
+        }
+
+        loaded = self._load_mutated(config)
+
+        self.assertEqual(loaded["destruction_scenario"]["target_drone_id"], "DRN-003",)
+
+    def test_destruction_scenario_rejects_unknown_target(self,):
+        config = copy.deepcopy(self.base_config)
+        config["destruction_scenario"] = {
+            "enabled": True,
+            "target_drone_id": "DRN-999",
+            "destroy_at_seconds": 38.0,
+        }
+
+        with self.assertRaises(
+            ValueError
+        ):
+            self._load_mutated(
+                config
+            )
+
+    def test_destruction_scenario_rejects_invalid_time(self,):
+
+        config = copy.deepcopy(self.base_config)
+
+        config["destruction_scenario"] = {
+            "enabled": True,
+            "target_drone_id": "DRN-003",
+            "destroy_at_seconds": (
+                config[
+                    "simulation"
+                ][
+                    "duration_seconds"
+                ]
+            ),
         }
 
         with self.assertRaises(

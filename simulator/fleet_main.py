@@ -3,6 +3,7 @@ from pathlib import Path
 import time
 import argparse
 
+
 def parse_args():
 
     parser = argparse.ArgumentParser(
@@ -23,6 +24,7 @@ def parse_args():
 
     return parser.parse_args()
 
+from simulator.scenarios.destruction import (DestructionScenario,)
 from simulator.config_loader import (load_config,)
 from simulator.communications.comms_gate import (CommsGate,)
 from simulator.communications.onboard_buffer import (OnboardBuffer,)
@@ -51,10 +53,7 @@ from simulator.transport.transport_engine import (TransportEngine,)
 # We can refactor shared helpers later.
 # =========================================================
 
-def mission_transition_reason(
-    previous_phase: MissionPhase,
-    new_phase: MissionPhase,
-) -> str:
+def mission_transition_reason(previous_phase: MissionPhase, new_phase: MissionPhase,) -> str:
 
     reasons = {
         (
@@ -143,38 +142,11 @@ def main() -> None:
     transport_config = config["transport"]
     buffer_config = transport_config["buffering"]
 
-    publishers_config = config.get(
-        "publishers",
-        {},
-    )
-
-    file_publisher_config = (
-        publishers_config.get(
-            "file",
-            {},
-        )
-    )
-
-    event_hubs_config = (
-        publishers_config.get(
-            "event_hubs",
-            {},
-        )
-    )
-
-    file_publisher_enabled = (
-        file_publisher_config.get(
-            "enabled",
-            True,
-        )
-    )
-
-    event_hubs_enabled = (
-        event_hubs_config.get(
-            "enabled",
-            False,
-        )
-    )
+    publishers_config = config.get("publishers",{},)
+    file_publisher_config = publishers_config.get("file",{},)
+    event_hubs_config = publishers_config.get("event_hubs",{},)
+    file_publisher_enabled = file_publisher_config.get("enabled", True,)
+    event_hubs_enabled = event_hubs_config.get("enabled",False,)
     
     buffer_target_drone_ids = (
         set(buffer_config["target_drone_ids"])
@@ -188,14 +160,9 @@ def main() -> None:
     )
     
     fault_config = transport_config.get("fault_injection", {},)
-
-    maintenance_scenario = (
-        MaintenanceLifecycleScenario.from_config(
-            config
-        )
-    )
-    
-    connectivity_scenario = (ConnectivityScenario.from_config(config))
+    maintenance_scenario = MaintenanceLifecycleScenario.from_config(config)
+    connectivity_scenario = ConnectivityScenario.from_config(config)
+    destruction_scenario = DestructionScenario.from_config(config)
     
     duplicate_targets = {
         (
@@ -272,12 +239,9 @@ def main() -> None:
     # Fleet runtimes
     # =====================================================
 
-    runtimes = build_fleet_runtimes(
-        config
-    )
+    runtimes = build_fleet_runtimes(config)
 
     if not runtimes:
-
         raise ValueError(
             "Fleet contains no drones"
         )
@@ -296,10 +260,7 @@ def main() -> None:
         ]
     )
 
-    output_dir.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
+    output_dir.mkdir(parents=True, exist_ok=True,)
 
     (
         manifest_path,
@@ -1349,6 +1310,117 @@ def main() -> None:
                                 f"pending="
                                 f"{onboard_buffer.count_for(drone_id=drone.drone_id)}"
                             )
+
+            # ---------------------------------------------
+            # Optional destruction scenario
+            #
+            # Destruction is terminal for the asset and
+            # mission. The terminal state transitions are
+            # transmitted as the final observable burst.
+            # No telemetry or movement is generated after
+            # this point.
+            # ---------------------------------------------
+
+            if destruction_scenario is not None:
+
+                destruction_events = (
+                    destruction_scenario.update(
+                        drone=drone,
+                        mission=mission,
+
+                        current_seconds=(
+                            clock.elapsed_seconds
+                        ),
+
+                        event_time=(
+                            clock.now
+                        ),
+
+                        schema_version=(
+                            telemetry_config[
+                                "schema_version"
+                            ]
+                        ),
+
+                        simulator_run_id=(
+                            simulation_context[
+                                "simulator_run_id"
+                            ]
+                        ),
+
+                        scenario=(
+                            simulation_context[
+                                "scenario"
+                            ]
+                        ),
+
+                        seed=(
+                            simulation[
+                                "seed"
+                            ]
+                        ),
+                    )
+                )
+
+                if destruction_events:
+
+                    for destruction_event in (
+                        destruction_events
+                    ):
+
+                        route_generated_event(
+                            event=destruction_event,
+                            drone=drone,
+                            force_transmit=True,
+                        )
+
+                        print(
+                            f"[DESTRUCTION EVENT] "
+                            f"T+{clock.elapsed_seconds:05.2f}s "
+                            f"{drone.drone_id} "
+                            f"| seq="
+                            f"{destruction_event['source_sequence_number']:04d} "
+                            f"| payload="
+                            f"{destruction_event['payload']}"
+                        )
+
+                    # Preserve one final Ground Truth snapshot
+                    # with the terminal state and last known
+                    # physical position.
+                    ground_truth_logger.log_snapshot(
+                        drone=drone,
+                        mission=mission,
+
+                        simulation_time=(
+                            clock.now
+                        ),
+
+                        elapsed_seconds=(
+                            clock.elapsed_seconds
+                        ),
+                    )
+
+                    runtime.completed = True
+
+                    print(
+                        f"[DRONE DESTROYED] "
+                        f"T+{clock.elapsed_seconds:05.2f}s "
+                        f"{drone.drone_id} "
+                        f"| asset_state="
+                        f"{drone.asset_state} "
+                        f"| mission_status="
+                        f"{mission.status.value} "
+                        f"| phase="
+                        f"{mission.phase.value} "
+                        f"| lat="
+                        f"{drone.latitude:.6f} "
+                        f"| lon="
+                        f"{drone.longitude:.6f} "
+                        f"| alt="
+                        f"{drone.altitude_m:.1f}m"
+                    )
+
+                    continue
 
             # ---------------------------------------------
             # Ground Truth

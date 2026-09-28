@@ -21,7 +21,9 @@ ALLOWED_TOP_LEVEL_SECTIONS = set(
     "fleet",
     "maintenance_scenario",
     "publishers",
-    "connectivity_scenario"
+    "connectivity_scenario",
+    "destruction_scenario"
+    
 }
 def _reject_unknown_keys(
     mapping: dict,
@@ -308,11 +310,7 @@ def _validate_target_rules(
 
     return seen_targets
 
-def _validate_communications(
-    communications: dict,
-    *,
-    path: str,
-) -> str:
+def _validate_communications(communications: dict, *, path: str,) -> str:
 
     _reject_unknown_keys(
         communications,
@@ -2332,5 +2330,98 @@ def load_config(
                         "reason_code"
                     ),
                 )
+
+    # =====================================================
+    # Destruction scenario
+    # =====================================================
+
+    destruction_scenario = config.get("destruction_scenario", {}, )
+
+    if destruction_scenario:
+
+        destruction_scenario = (
+            _require_mapping(
+                destruction_scenario,
+                path="destruction_scenario",
+            )
+        )
+
+        _reject_unknown_keys(
+            destruction_scenario,
+            allowed={
+                "enabled",
+                "target_drone_id",
+                "destroy_at_seconds",
+            },
+            path="destruction_scenario",
+        )
+
+        enabled = destruction_scenario.get(
+            "enabled",
+            False,
+        )
+
+        if not isinstance(
+            enabled,
+            bool,
+        ):
+            raise ValueError(
+                "destruction_scenario.enabled "
+                "must be boolean"
+            )
+
+        if enabled:
+
+            if fleet_drone_ids is None:
+                raise ValueError(
+                    "destruction_scenario "
+                    "requires a fleet section"
+                )
+
+            target_drone_id = (
+                _require_non_empty_string(
+                    destruction_scenario.get(
+                        "target_drone_id"
+                    ),
+                    path=(
+                        "destruction_scenario."
+                        "target_drone_id"
+                    ),
+                )
+            )
+
+            if (
+                target_drone_id
+                not in fleet_drone_ids
+            ):
+                raise ValueError(
+                    "destruction_scenario."
+                    "target_drone_id is not "
+                    "a fleet member: "
+                    f"{target_drone_id}"
+                )
+
+            destroy_at_seconds = (
+                destruction_scenario.get(
+                    "destroy_at_seconds"
+                )
+            )
+
+            if (
+                not isinstance(
+                    destroy_at_seconds,
+                    (int, float),
+                )
+                or destroy_at_seconds < 0
+                or destroy_at_seconds
+                >= duration_seconds
+            ):
+                raise ValueError(
+                    "destruction_scenario."
+                    "destroy_at_seconds must "
+                    "be >= 0 and less than "
+                    "simulation.duration_seconds"
+                )
+
     return config
 
