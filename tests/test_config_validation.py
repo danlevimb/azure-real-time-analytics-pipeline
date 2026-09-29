@@ -920,6 +920,101 @@ class TestFleetConfigValidation(
             self._load_mutated(
                 config
             )
+
+    def test_v1_2_accepts_rf_jamming_on_rf_target(self,):
+        config = copy.deepcopy(self.base_config)
+        config["config_version"] = "1.2"
+        config["telemetry"]["schema_version"] = "1.2"
+        config["drone"]["communications"] = {"mode": "RF",}
+        config["drone"]["operational_profile"].pop("initial_optic_fiber_m", None,)
+        target = (config["fleet"]["members"][0])
+
+        config["transport"]["fault_injection"]["extra_delay_targets"] = [
+            {
+                "drone_id": (
+                    target["drone_id"]
+                ),
+                "source_sequence_number": 30,
+                "extra_delay_ms": 7000,
+                "fault_type": "RF_JAMMING",
+            }
+        ]
+
+        loaded = self._load_mutated(config)
+
+        self.assertEqual(loaded["transport"]["fault_injection"]["extra_delay_targets"][0]["fault_type"],"RF_JAMMING",)
+
+    def test_v1_2_rejects_rf_jamming_on_fiber_target(self,):
+        config = copy.deepcopy(self.base_config)
+        config["config_version"] = "1.2"
+        config["telemetry"]["schema_version"] = "1.2"
+        config["drone"]["communications"] = {"mode": "RF",}
+        config["drone"]["operational_profile"].pop("initial_optic_fiber_m",None,)
+        target = (config["fleet"]["members"][1])
+        target["communications"] = {"mode": "FIBER","initial_optic_fiber_m": 10000.0,}
+
+        config["transport"][
+            "fault_injection"
+        ][
+            "extra_delay_targets"
+        ] = [
+            {
+                "drone_id": (
+                    target["drone_id"]
+                ),
+                "source_sequence_number": 30,
+                "extra_delay_ms": 7000,
+                "fault_type": "RF_JAMMING",
+            }
+        ]
+
+        with self.assertRaises(ValueError):
+            self._load_mutated(config)
+
+    def test_v1_2_allows_generic_delay_on_fiber_target(self,):
+
+        config = copy.deepcopy(
+            self.base_config
+        )
+
+        config["config_version"] = "1.2"
+        config["telemetry"]["schema_version"] = "1.2"
+
+        config["drone"]["communications"] = {
+            "mode": "RF",
+        }
+
+        config["drone"][
+            "operational_profile"
+        ].pop(
+            "initial_optic_fiber_m",
+            None,
+        )
+
+        target = (config["fleet"]["members"][1])
+
+        target["communications"] = {
+            "mode": "FIBER",
+            "initial_optic_fiber_m": 10000.0,
+        }
+
+        config["transport"][
+            "fault_injection"
+        ][
+            "extra_delay_targets"
+        ] = [
+            {
+                "drone_id": (
+                    target["drone_id"]
+                ),
+                "source_sequence_number": 30,
+                "extra_delay_ms": 7000,
+            }
+        ]
+
+        loaded = self._load_mutated(config)
+
+        self.assertEqual(loaded["transport"]["fault_injection"]["extra_delay_targets"][0]["extra_delay_ms"],7000,)
     
 if __name__ == "__main__":
     unittest.main()

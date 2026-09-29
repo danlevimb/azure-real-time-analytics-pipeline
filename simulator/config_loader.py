@@ -208,9 +208,7 @@ def _validate_target_rules(
 
     seen_targets = set()
 
-    for index, rule in enumerate(
-        rules
-    ):
+    for index, rule in enumerate(rules):
 
         _require_mapping(
             rule,
@@ -235,18 +233,9 @@ def _validate_target_rules(
             )
         )
 
-        sequence_number = rule.get(
-            "source_sequence_number"
-        )
+        sequence_number = rule.get("source_sequence_number")
 
-        if (
-            not isinstance(
-                sequence_number,
-                int,
-            )
-            or sequence_number
-            <= 0
-        ):
+        if (not isinstance(sequence_number, int,) or sequence_number <= 0):
 
             raise ValueError(
                 f"transport.fault_injection."
@@ -255,12 +244,7 @@ def _validate_target_rules(
                 "must be a positive integer"
             )
 
-        if (
-            fleet_drone_ids
-            is not None
-            and drone_id
-            not in fleet_drone_ids
-        ):
+        if (fleet_drone_ids is not None and drone_id not in fleet_drone_ids):
 
             raise ValueError(
                 f"transport.fault_injection."
@@ -269,37 +253,21 @@ def _validate_target_rules(
                 f"{drone_id}"
             )
 
-        target = (
-            drone_id,
-            sequence_number,
-        )
+        target = (drone_id, sequence_number,)
 
         if target in seen_targets:
-
             raise ValueError(
                 f"Duplicate target in "
                 f"{rule_name}: "
                 f"{target}"
             )
 
-        seen_targets.add(
-            target
-        )
+        seen_targets.add(target)
 
         if require_delay:
+            extra_delay_ms = rule.get("extra_delay_ms")
 
-            extra_delay_ms = rule.get(
-                "extra_delay_ms"
-            )
-
-            if (
-                not isinstance(
-                    extra_delay_ms,
-                    (int, float),
-                )
-                or extra_delay_ms < 0
-            ):
-
+            if (not isinstance(extra_delay_ms,(int, float),) or extra_delay_ms < 0):
                 raise ValueError(
                     f"transport."
                     f"fault_injection."
@@ -321,58 +289,30 @@ def _validate_communications(communications: dict, *, path: str,) -> str:
         path=path,
     )
 
-    mode = (
-        _require_non_empty_string(
-            communications.get(
-                "mode"
-            ),
-            path=f"{path}.mode",
-        )
-        .upper()
-    )
+    mode = (_require_non_empty_string(communications.get("mode"),path=f"{path}.mode",).upper())
 
-    if mode not in {
-        "RF",
-        "FIBER",
-    }:
-
+    if mode not in {"RF","FIBER",}:
         raise ValueError(
             f"{path}.mode must be "
             "RF or FIBER"
         )
 
-    has_fiber_capacity = (
-        "initial_optic_fiber_m"
-        in communications
-    )
+    has_fiber_capacity = ("initial_optic_fiber_m" in communications)
 
-    if (
-        mode == "RF"
-        and has_fiber_capacity
-    ):
-
+    if (mode == "RF" and has_fiber_capacity):
         raise ValueError(
             f"{path}.initial_optic_fiber_m "
             "is not valid for RF drones"
         )
 
-    if (
-        mode == "FIBER"
-        and not has_fiber_capacity
-    ):
-
+    if (mode == "FIBER" and not has_fiber_capacity):
         raise ValueError(
             f"{path}.initial_optic_fiber_m "
             "is required for FIBER drones"
         )
 
     if mode == "FIBER":
-
-        initial_optic_fiber_m = (
-            communications[
-                "initial_optic_fiber_m"
-            ]
-        )
+        initial_optic_fiber_m = (communications["initial_optic_fiber_m"])
 
         if (
             not isinstance(
@@ -390,40 +330,38 @@ def _validate_communications(communications: dict, *, path: str,) -> str:
 
     return mode
 
-def load_config(
-    config_path: Path,
-    *,
-    require_fleet: bool = False,
-) -> dict:
+def _effective_communication_mode(config: dict, target_drone_id: str,) -> str:
+    target_mode = str(config["drone"]["communications"]["mode"]).upper()
 
-    with config_path.open(
-        "r",
-        encoding="utf-8",
-    ) as file:
+    for member in config.get("fleet",{},).get("members", [],):
+        if (member.get("drone_id") != target_drone_id):
+            continue
 
+        member_communications = (member.get("communications"))
+
+        if (member_communications is not None):
+            target_mode = str(member_communications["mode"]).upper()
+
+        break
+
+    return target_mode
+
+def load_config(config_path: Path, *, require_fleet: bool = False,) -> dict:
+    with config_path.open("r", encoding="utf-8",) as file:
         config = yaml.safe_load(file)
 
     if not config:
-
         raise ValueError("Configuration file is empty.")
 
     config_version = str(config.get("config_version", "1.0",))
 
-    if config_version not in {
-        "1.0",
-        "1.1",
-        "1.2",
-    }:
-
+    if config_version not in {"1.0", "1.1", "1.2",}:
         raise ValueError(
             "config_version must be "
             "one of: 1.0, 1.1, 1.2"
         )
     
-    _require_mapping(
-        config,
-        path="configuration",
-    )
+    _require_mapping(config, path="configuration",)
 
     _reject_unknown_keys(
         config,
@@ -456,26 +394,11 @@ def load_config(
     # Simulation
     # =====================================================
 
-    simulation = _require_mapping(
-        config["simulation"],
-        path="simulation",
-    )
-
-    tick_ms = simulation.get(
-        "tick_ms"
-    )
-
-    duration_seconds = simulation.get(
-        "duration_seconds"
-    )
-
-    speed_multiplier = simulation.get(
-        "speed_multiplier"
-    )
-
-    seed = simulation.get(
-        "seed"
-    )
+    simulation = _require_mapping(config["simulation"], path="simulation",)
+    tick_ms = simulation.get("tick_ms")
+    duration_seconds = simulation.get("duration_seconds")
+    speed_multiplier = simulation.get("speed_multiplier")
+    seed = simulation.get("seed")
 
     if (
         not isinstance(
@@ -489,14 +412,7 @@ def load_config(
             "simulation.tick_ms must be > 0"
         )
 
-    if (
-        not isinstance(
-            duration_seconds,
-            (int, float),
-        )
-        or duration_seconds <= 0
-    ):
-
+    if (not isinstance(duration_seconds, (int, float), ) or duration_seconds <= 0):
         raise ValueError(
             "simulation.duration_seconds "
             "must be > 0"
@@ -1970,19 +1886,85 @@ def load_config(
             f"{sorted(target_overlap)}"
         )
 
+    extra_delay_targets = (fault_config.get("extra_delay_targets",[],))
+
     _validate_target_rules(
-        fault_config.get(
-            "extra_delay_targets",
-            [],
-        ),
-        rule_name=(
-            "extra_delay_targets"
-        ),
-        fleet_drone_ids=(
-            fleet_drone_ids
-        ),
-        require_delay=True,
-    )
+        extra_delay_targets,
+        rule_name = "extra_delay_targets",
+        fleet_drone_ids = fleet_drone_ids, 
+        require_delay = True,)
+
+    # =====================================================
+    # Optional semantic fault classification
+    #
+    # Generic extra delay remains valid for any
+    # communication mode.
+    #
+    # RF_JAMMING is intentionally restricted to RF.
+    # =====================================================
+
+    for index, rule in enumerate(
+        extra_delay_targets
+    ):
+
+        fault_type = rule.get("fault_type")
+
+        if fault_type is None:
+            continue
+
+        if config_version != "1.2":
+
+            raise ValueError(
+                "transport.fault_injection."
+                f"extra_delay_targets[{index}]."
+                "fault_type requires "
+                "config_version 1.2"
+            )
+
+        fault_type = (
+            _require_non_empty_string(
+                fault_type,
+                path=(
+                    "transport.fault_injection."
+                    f"extra_delay_targets[{index}]."
+                    "fault_type"
+                ),
+            )
+            .upper()
+        )
+
+        if fault_type != "RF_JAMMING":
+
+            raise ValueError(
+                "transport.fault_injection."
+                f"extra_delay_targets[{index}]."
+                "fault_type must be "
+                "RF_JAMMING"
+            )
+
+        target_drone_id = (
+            rule["drone_id"]
+        )
+
+        target_mode = (
+            _effective_communication_mode(
+                config,
+                target_drone_id,
+            )
+        )
+
+        if target_mode != "RF":
+
+            raise ValueError(
+                f"{fault_type} is not valid "
+                f"for {target_drone_id} "
+                f"communication_mode "
+                f"{target_mode}"
+            )
+
+        rule["fault_type"] = (
+            fault_type
+        )
 
     # =====================================================
     # Maintenance lifecycle scenario
@@ -2272,15 +2254,7 @@ def load_config(
                     },
                 }
 
-                template_mode = config["drone"]["communications"]["mode"]
-                target_mode = template_mode
-
-                for member in config["fleet"]["members"]:
-                    if member["drone_id"] == target_drone_id:
-                        member_comms = member.get("communications")
-                        if member_comms is not None:
-                            target_mode = member_comms["mode"]
-                        break
+                target_mode = (_effective_communication_mode(config, target_drone_id,))
 
                 if (
                     fault_type
