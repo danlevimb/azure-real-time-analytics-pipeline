@@ -24,30 +24,57 @@ FleetOperationalSummary(p_RunId:string) {
     FleetOperationalView(p_RunId)
     | summarize
         TotalDrones = count(),
+        // Communication modes
         RfDrones = countif(communication_mode == "RF"),
         FiberDrones = countif(communication_mode == "FIBER"),
         UnknownCommunicationModeDrones = countif(isempty(communication_mode)),
+        // Operational state
         AvailableDrones = countif(asset_state == "AVAILABLE"),
         ConnectedDrones = countif(connection_state == "CONNECTED"),
         CompletedMissions = countif(mission_status == "COMPLETED"),
         HealthyDrones = countif(platform_health == "NORMAL"),
+        // Terminal state
+        DestroyedDrones = countif(asset_state == "DESTROYED"),
+        AbortedMissions = countif(mission_status == "ABORTED"),
+        TerminalAssets = countif(asset_state == "DESTROYED" or mission_status == "ABORTED"),
+        // Consumables / health
         AvgBatteryPct = avg(battery_pct),
         MinBatteryPct = min(battery_pct),
         AvgOpticFiberRemainingM = avgif(optic_fiber_remaining_m, communication_mode == "FIBER"),
-        MinOpticFiberRemainingM = minif(optic_fiber_remaining_m,communication_mode == "FIBER"),
+        MinOpticFiberRemainingM = minif(optic_fiber_remaining_m, communication_mode == "FIBER"),
         LatestStateAsOf = max(state_as_of),
         LatestTelemetryAsOf = max(telemetry_as_of)
     | extend
-        AvailabilityPct = round(100.0 * todouble(AvailableDrones) / TotalDrones, 1),
+        AvailabilityPct = round(100.0 * todouble(AvailableDrones) / TotalDrones,1),
         ConnectivityPct = round(100.0 * todouble(ConnectedDrones) / TotalDrones, 1),
         MissionCompletionPct = round(100.0 * todouble(CompletedMissions) / TotalDrones, 1),
         HealthyPct = round(100.0 * todouble(HealthyDrones) / TotalDrones, 1),
-        CommunicationModeCoveragePct = round(100.0 * todouble(RfDrones + FiberDrones) / TotalDrones, 1)
+        CommunicationModeCoveragePct = round(100.0 * todouble(RfDrones + FiberDrones) / TotalDrones, 1),
+        AssetLossPct = round(100.0 * todouble(DestroyedDrones) / TotalDrones, 1)
     | project
-        TotalDrones, RfDrones, FiberDrones, UnknownCommunicationModeDrones, CommunicationModeCoveragePct,
-        AvailableDrones, AvailabilityPct, ConnectedDrones, ConnectivityPct, CompletedMissions,
-        MissionCompletionPct, HealthyDrones, HealthyPct, AvgBatteryPct, MinBatteryPct,
-        AvgOpticFiberRemainingM, MinOpticFiberRemainingM, LatestStateAsOf, LatestTelemetryAsOf
+        TotalDrones,
+        RfDrones,
+        FiberDrones,
+        UnknownCommunicationModeDrones,
+        CommunicationModeCoveragePct,
+        AvailableDrones,
+        AvailabilityPct,
+        ConnectedDrones,
+        ConnectivityPct,
+        CompletedMissions,
+        MissionCompletionPct,
+        HealthyDrones,
+        HealthyPct,
+        DestroyedDrones,
+        AbortedMissions,
+        TerminalAssets,
+        AssetLossPct,
+        AvgBatteryPct,
+        MinBatteryPct,
+        AvgOpticFiberRemainingM,
+        MinOpticFiberRemainingM,
+        LatestStateAsOf,
+        LatestTelemetryAsOf
 }
 
 .create-or-alter function 
@@ -93,15 +120,74 @@ CurrentFleetMapView() {
     CurrentFleetOperationalView()
     | extend telemetry_age_ms = datetime_diff("millisecond", now(), telemetry_ingested_at)
     | extend telemetry_age_sec = round(todouble(telemetry_age_ms) / 1000.0, 1)
+    | extend
+        operational_condition =
+            case(
+                asset_state == "DESTROYED", "DESTROYED",
+                mission_status == "ABORTED", "MISSION ABORTED",
+                connection_state != "CONNECTED", "DISCONNECTED",
+                mission_status == "COMPLETED", "MISSION COMPLETED",
+                mission_status == "ACTIVE", "MISSION ACTIVE",
+                "OTHER"
+            )
     | project 
-        drone_id, 
-        battalion_id, mission_id, 
-        latitude, longitude, altitude_m, heading_deg,
-        ground_speed_mps, vertical_speed_mps,
-        battery_pct, communication_mode, optic_fiber_remaining_m,
-        asset_state, connection_state,
-        mission_phase, mission_status,
+        drone_id,
+        battalion_id,
+        mission_id,
+        latitude,
+        longitude,
+        altitude_m,
+        heading_deg,
+        ground_speed_mps,
+        vertical_speed_mps,
+        battery_pct,
+        communication_mode,
+        optic_fiber_remaining_m,
+        asset_state,
+        connection_state,
+        mission_phase,
+        mission_status,
         platform_health,
-        telemetry_as_of, telemetry_ingested_at, telemetry_age_sec, state_as_of
+        operational_condition,
+        telemetry_as_of,
+        telemetry_ingested_at,
+        telemetry_age_sec,
+        state_as_of
     | order by drone_id asc
+}
+
+.create-or-alter function
+with (
+    folder = "Gold/Serving",
+    docstring = "Terminal fleet assets with last-known telemetry position and reconciled operational state",
+    skipvalidation = "true"
+)
+CurrentTerminalAssetsView() {
+    CurrentFleetMapView()
+    | where
+        asset_state == "DESTROYED" or mission_status == "ABORTED"
+    | extend
+        terminal_condition =
+            case(
+                asset_state == "DESTROYED", "DESTROYED",
+                mission_status == "ABORTED", "MISSION ABORTED",
+                "TERMINAL"
+            )
+    | project
+        drone_id,
+        terminal_condition,
+        asset_state,
+        mission_status,
+        mission_phase,
+        connection_state,
+        communication_mode,
+        latitude,
+        longitude,
+        altitude_m,
+        battery_pct,
+        optic_fiber_remaining_m,
+        telemetry_as_of,
+        state_as_of,
+        telemetry_age_sec
+    | order by state_as_of desc
 }
