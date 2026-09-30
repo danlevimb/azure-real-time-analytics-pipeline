@@ -191,3 +191,119 @@ CurrentTerminalAssetsView() {
         telemetry_age_sec
     | order by state_as_of desc
 }
+
+.create-or-alter function
+with (
+    folder = "Gold/Serving",
+    docstring = "Current per-drone communication health and delivery-order diagnostics",
+    skipvalidation = "true")
+CurrentCommunicationHealthView() {
+    let LatestRun = toscalar(LatestObservedRun() | project RunId);
+    // -----------------------------------------------------
+    // Current communication state from reconciled serving.
+    // -----------------------------------------------------
+    let CurrentState =
+        CurrentFleetOperationalView()
+        | project drone_id, communication_mode, connection_state, optic_fiber_remaining_m, telemetry_as_of, state_as_of;
+    // -----------------------------------------------------
+    // First physical observation of each logical event.
+    // Deduplication here prevents downstream redelivery
+    // from being misclassified as delivery disorder.
+    // -----------------------------------------------------
+    let FirstDelivery =
+        RawDroneEvents
+        | where tostring(simulation.simulator_run_id) == LatestRun
+        | extend raw_ingested_at = ingestion_time()
+        | summarize arg_min(raw_ingested_at, *)
+        by event_id
+        | project 
+            drone_id = tostring(drone_id),
+            source_sequence_number = tolong(source_sequence_number),
+            eh_sequence_number = tolong(eh_sequence_number),
+            event_time = todatetime(event_time),
+            eh_enqueued_time;
+    // -----------------------------------------------------
+    // Detect delivery-order inversions independently for each producer.
+    // -----------------------------------------------------
+    let DeliveryDiagnostics =
+        FirstDelivery
+        | sort by drone_id asc, eh_sequence_number asc
+        | serialize
+        | extend 
+            PrevDrone = prev(drone_id),
+            PrevSourceSequence = prev(source_sequence_number),
+            RelativeDelayMs = datetime_diff("millisecond", eh_enqueued_time, event_time)
+        | extend
+            IsOutOfOrder = PrevDrone == drone_id and source_sequence_number < PrevSourceSequence            
+        | summarize
+            OutOfOrderEvents = countif(IsOutOfOrder),
+            MaxRelativeDelayMs = max(RelativeDelayMs)
+        by drone_id;
+    CurrentState
+    | join kind = leftouter DeliveryDiagnostics on drone_id
+    | extend OutOfOrderEvents = coalesce(OutOfOrderEvents, 0)
+    | extend
+        communication_condition =
+            case(
+                connection_state != "CONNECTED", "DISCONNECTED", 
+                OutOfOrderEvents > 0, "DELIVERY DISORDER",
+                "HEALTHY"
+            )
+    | project
+        drone_id,
+        communication_mode,
+        communication_condition,
+        connection_state,
+        OutOfOrderEvents,
+        MaxRelativeDelayMs,
+        optic_fiber_remaining_m,
+        telemetry_as_of,
+        state_as_of
+    | order by
+        communication_condition desc,
+        drone_id asc
+}
+
+.create-or-alter function
+with (
+    folder = "Gold/Serving",
+    docstring = "Current fleet-level communication health KPIs",
+    skipvalidation = "true")
+CurrentCommunicationHealthSummary() {
+    CurrentCommunicationHealthView()
+    | summarize
+        TotalDrones             = count(),
+        RfDrones                = countif(communication_mode == "RF"),
+        FiberDrones             = countif(communication_mode == "FIBER"),
+        HealthyLinks            = countif(communication_condition == "HEALTHY"),
+        DeliveryDisorderLinks   = countif(communication_condition == "DELIVERY DISORDER"),
+        DisconnectedLinks       = countif(communication_condition == "DISCONNECTED"),
+        AffectedLinks           = countif(communication_condition != "HEALTHY"),
+        OutOfOrderEvents        = sum(OutOfOrderEvents),
+        MaxRelativeDelayMs      = max(MaxRelativeDelayMs)
+    | extend 
+        HealthyLinksPct = round(100.0 * todouble(HealthyLinks) / TotalDrones, 1),
+        AffectedLinksPct        = round(100.0 * todouble(AffectedLinks) / TotalDrones, 1)
+}
+
+.create-or-alter function
+with (
+    folder = "Gold/Serving",
+    docstring = "Current-run communication link state transition events",
+    skipvalidation = "true"
+)
+CurrentLinkStateEventsView() {
+    let RunId = toscalar(LatestObservedRun() | project RunId);
+    let CommunicationModes = CurrentFleetOperationalView() | project drone_id, communication_mode;
+    StateTransitionsCanonical
+    | where simulator_run_id == RunId and state_domain == "connection_state"
+    | join kind = leftouter CommunicationModes on drone_id
+    | extend LinkTransition = strcat(previous_state, " → ", new_state)
+    | extend LinkEventClass = case(
+            new_state == "DISCONNECTED", "LINK DOWN", 
+            new_state == "CONNECTED","LINK RESTORED",
+            "STATE CHANGE")
+    | project drone_id, communication_mode, LinkEventClass, LinkTransition, reason_code, 
+        event_time, source_sequence_number
+    | order by event_time desc, drone_id asc
+}
