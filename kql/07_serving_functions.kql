@@ -307,3 +307,42 @@ CurrentLinkStateEventsView() {
         event_time, source_sequence_number
     | order by event_time desc, drone_id asc
 }
+
+.create-or-alter function
+with (
+    folder = "Gold/Serving",
+    docstring = "Current-run 10-second arrival-window metrics based on Event Hubs enqueue time",
+    skipvalidation = "true"
+)
+CurrentArrivalWindowMetrics() {
+    let RunId = toscalar(LatestObservedRun() | project RunId);
+    RawDroneEvents
+    | where tostring(simulation.simulator_run_id) == RunId
+    | extend
+        RawIngestedAt = ingestion_time(),
+        RelativeDelayMs = datetime_diff("millisecond", eh_enqueued_time, todatetime(event_time))
+    | extend        
+        CloudLatencyMs = datetime_diff("millisecond", RawIngestedAt, eh_enqueued_time),
+        WindowStart = bin(eh_enqueued_time, 10s)
+    | summarize
+        DeliveryRows            = count(),
+        UniqueEvents            = count_distinct(event_id),
+        TelemetryEvents         = countif(event_type == "telemetry"),
+        StateTransitionEvents   = countif(event_type == "state_transition"),
+        P95RelativeDelayMs      = percentile(RelativeDelayMs, 95),
+        MaxRelativeDelayMs      = max(RelativeDelayMs),
+        P95CloudLatencyMs       = percentile(CloudLatencyMs, 95),
+        MaxCloudLatencyMs       = max(CloudLatencyMs),
+        FirstArrival            = min(eh_enqueued_time),
+        LastArrival             = max(eh_enqueued_time)
+      by WindowStart
+    | extend
+        WindowEnd               = WindowStart + 10s,
+        DuplicateDeliveries     = DeliveryRows - UniqueEvents,
+        EventsPerSecond         = round(todouble(DeliveryRows) / 10.0,2)
+    | project
+        WindowStart, WindowEnd, DeliveryRows, UniqueEvents, DuplicateDeliveries,
+        TelemetryEvents, StateTransitionEvents, EventsPerSecond, P95RelativeDelayMs, MaxRelativeDelayMs,
+        P95CloudLatencyMs, MaxCloudLatencyMs, FirstArrival, LastArrival
+    | order by WindowStart desc 
+}
