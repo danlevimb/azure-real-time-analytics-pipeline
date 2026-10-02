@@ -264,10 +264,6 @@ Documents logical extensions beyond the current portfolio-ready MVP.
 
 # Repository and Closeout
 
-### [Public Repository Structure](public_repo_structure.md)
-
-Explains the role of the main repository folders and public-facing artifacts.
-
 ### [Final Repository QA Checklist](final_repository_qa_checklist.md)
 
 Validates the repository before public closeout.
@@ -279,10 +275,6 @@ Tracks technical, documentation, evidence, Git, and cost-related closeout activi
 ### [Portfolio Positioning](portfolio_positioning.md)
 
 Summarizes how the project should be explained and defended as an Azure Data Engineering portfolio project.
-
-### [Roadmap Update Notes](roadmap_update_notes.md)
-
-Contains the updates required for the private Azure portfolio roadmap after formal project closeout.
 
 ---
 
