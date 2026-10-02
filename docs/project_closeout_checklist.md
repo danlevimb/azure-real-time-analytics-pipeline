@@ -13,7 +13,7 @@
 
 **Project:** `azure-real-time-analytics-pipeline`
 **Purpose:** Master checklist for technical, evidence, documentation, Git, Azure, and portfolio closeout
-**Status:** Closeout in progress — technical/evidence validation complete; README, public QA, cost cleanup, and roadmap update pending
+**Status:** Closeout in progress — technical/evidence validation, public GitHub QA, and Azure cleanup complete; final local synchronization, Git-history safety review, and roadmap update remain
 
 ---
 
@@ -398,13 +398,13 @@ Verify the primary project documentation.
 
 For each document:
 
-* [ ] Markdown renders correctly.
-* [ ] Internal links work.
-* [ ] Navigation is consistent.
-* [ ] File names are correct.
-* [ ] Content matches the actual implementation.
-* [ ] Azure Data Engineering remains the primary narrative.
-* [ ] Simulator details remain supporting context.
+* [x] Markdown renders correctly.
+* [x] Internal links work.
+* [x] Navigation is consistent.
+* [x] File names are correct.
+* [x] Content matches the actual implementation.
+* [x] Azure Data Engineering remains the primary narrative.
+* [x] Simulator details remain supporting context.
 
 ---
 
@@ -566,7 +566,7 @@ banner.png
 * [x] Final diagram set selected.
 * [x] Diagrams emphasize Data Engineering.
 * [x] Diagram labels match repository terminology.
-* [ ] Diagram links work.
+* [x] Diagram links work.
 * [x] README uses only the strongest diagrams.
 * [x] Supporting diagrams live under `diagrams/`.
 
@@ -653,14 +653,14 @@ Perform the complete safety review defined in:
 
 Verify:
 
-* [ ] No secrets
-* [ ] No connection strings
-* [ ] No SAS tokens
-* [ ] No access keys
-* [ ] No passwords
-* [ ] No bearer tokens
-* [ ] No client secrets
-* [ ] No unintended personal information
+* [x] No secrets
+* [x] No connection strings
+* [x] No SAS tokens
+* [x] No access keys
+* [x] No passwords
+* [x] No bearer tokens
+* [x] No client secrets
+* [x] No unintended personal information
 * [x] Dashboard export reviewed and sanitized
 * [x] Evidence reviewed and classified PUBLIC-SAFE
 * [x] Final evidence/showcase YAML configurations reviewed for public use
@@ -691,17 +691,17 @@ git log --oneline -n 10
 
 Verify:
 
-* [ ] Working tree is clean.
-* [ ] Intended files are tracked.
-* [ ] Unwanted files are ignored.
-* [ ] Final documentation is committed.
-* [ ] Final evidence is committed.
-* [ ] Dashboard export is committed.
-* [ ] KQL files are committed.
-* [ ] Contracts are committed.
-* [ ] Root README is committed.
+* [x] Working tree is clean.
+* [x] Intended files are tracked.
+* [x] Unwanted files are ignored.
+* [x] Final documentation is committed.
+* [x] Final evidence is committed.
+* [x] Dashboard export is committed.
+* [x] KQL files are committed.
+* [x] Contracts are committed.
+* [x] Root README is committed.
 * [ ] Local branch is synchronized.
-* [ ] Remote repository contains the final version.
+* [x] Remote repository contains the final version.
 
 ---
 
@@ -713,18 +713,18 @@ Do not rely only on VS Code rendering.
 
 Verify:
 
-* [ ] Root README renders correctly.
-* [ ] Hero/banner renders correctly if used.
-* [ ] Architecture diagrams render.
-* [ ] Documentation links work.
-* [ ] Documentation Hub works.
-* [ ] Evidence images render.
-* [ ] Evidence links work.
-* [ ] Contract links work.
-* [ ] Dashboard artifact is visible.
-* [ ] Repository folders are understandable.
-* [ ] No broken Markdown blocks exist.
-* [ ] No accidental sensitive information is visible.
+* [x] Root README renders correctly.
+* [x] Hero/banner renders correctly if used.
+* [x] Architecture diagrams render.
+* [x] Documentation links work.
+* [x] Documentation Hub works.
+* [x] Evidence images render.
+* [x] Evidence links work.
+* [x] Contract links work.
+* [x] Dashboard artifact is visible.
+* [x] Repository folders are understandable.
+* [x] No broken Markdown blocks exist.
+* [x] No accidental sensitive information is visible.
 * [ ] Mobile/narrow-width rendering remains acceptable where practical.
 
 ---
@@ -733,16 +733,16 @@ Verify:
 
 Before formal closeout:
 
-* [ ] Identify resources still running.
-* [ ] Identify resources with continuous cost.
-* [ ] Review Event Hubs cost.
-* [ ] Review analytical/Fabric/Kusto-related cost if applicable.
-* [ ] Review storage cost.
-* [ ] Review networking cost if applicable.
-* [ ] Decide what remains active for demos.
-* [ ] Decide what can be disabled.
-* [ ] Decide what can be deleted.
-* [ ] Record intentional resource-retention decisions.
+* [x] Identify resources still running.
+* [x] Identify resources with continuous cost.
+* [x] Review Event Hubs cost.
+* [x] Review analytical workspace retention/cost applicability.
+* [x] Review storage cost applicability — no project storage resource remained in the project resource group.
+* [x] Review networking cost applicability — no project networking resource remained in the project resource group.
+* [x] Decide what remains active for demos — no live Azure resources are intentionally retained.
+* [x] Decide what can be disabled.
+* [x] Decide what can be deleted.
+* [x] Record intentional resource-retention decisions — none; GitHub artifacts and evidence preserve portfolio value.
 
 The repository does not require permanently running infrastructure to remain portfolio-valid.
 
@@ -757,12 +757,32 @@ After all required cloud evidence has been captured:
 * [x] Capture final KQL evidence.
 * [x] Capture final dashboard evidence.
 * [x] Confirm no additional cloud screenshots are required.
-* [ ] Disable unnecessary components.
-* [ ] Delete unnecessary resources where appropriate.
+* [x] Disable unnecessary components — superseded by full deletion of the project resources.
+* [x] Delete unnecessary resources where appropriate.
 * [ ] Verify no unintended recurring charges remain.
-* [ ] Document resources intentionally preserved.
+* [x] Document resources intentionally preserved — none.
 
 Do **not** delete resources before evidence capture is complete.
+
+### Final cleanup decision — 2026-10-02
+
+```text
+Event Hubs namespace:
+DELETED — recurring project cost removed.
+
+Analytics workspace:
+DELETED — empty and no longer required for portfolio evidence.
+
+Project resource group:
+REMOVED after project resources were deleted.
+
+Resources intentionally retained:
+NONE
+```
+
+The repository remains portfolio-valid because the implementation, KQL, contracts, dashboard export, documentation, conceptual diagrams, and 33 reviewed evidence screenshots are preserved in GitHub.
+
+Azure billing data may lag behind resource deletion, so one final cost refresh remains required to confirm that no new project charges accumulate.
 
 ---
 
@@ -910,13 +930,13 @@ only when the following are true:
 * [x] Evidence capture is complete.
 * [x] Evidence Index is complete.
 * [x] Root README is final.
-* [ ] Documentation navigation is complete.
+* [x] Documentation navigation is complete.
 * [x] Known limitations are documented.
 * [x] Future improvements are documented.
 * [ ] Final Repository QA has passed.
-* [ ] GitHub public QA has passed.
+* [x] GitHub public QA has passed.
 * [ ] Public-safety review has passed.
-* [ ] Cost/cleanup decision is complete.
+* [x] Cost/cleanup decision is complete.
 * [ ] Private roadmap has been updated.
 
 ---
@@ -942,13 +962,13 @@ Dashboard artifact:
 COMPLETE — four-page export sanitized for public repository use
 
 Repository QA:
-IN PROGRESS — remaining public-Markdown navigation, repository-wide safety scan, GitHub render/link QA, and final synchronization remain
+PASSED WITH OPEN ITEMS — public GitHub QA, navigation, current-tree safety scan, and Azure cleanup are complete; Git-history safety review and final local synchronization remain
 
 Technical closeout date:
 Pending formal acceptance
 
 Azure cleanup / retention decision:
-Pending
+COMPLETE — project Event Hubs namespace, empty analytics workspace, and project resource group removed; no live project resources intentionally retained. Final cost refresh pending billing propagation.
 
 Private roadmap updated:
 Pending
