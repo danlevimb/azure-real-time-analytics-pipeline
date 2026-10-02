@@ -13,7 +13,7 @@
 
 **Project:** `azure-real-time-analytics-pipeline`
 **Purpose:** Final technical, documentation, evidence, Git, and public-safety validation
-**Status:** QA in progress — technical, evidence, dashboard, and artifact validation complete; final public-repository checks remain
+**Status:** QA in progress — technical, evidence, dashboard, public GitHub, current-tree safety, and Azure cleanup validated; final local synchronization and Git-history review remain
 
 ---
 
@@ -495,13 +495,13 @@ evidence_index.md
 final_repository_qa_checklist.md
 ```
 
-* [ ] Every current document renders correctly in GitHub.
-* [ ] Navigation links work.
-* [ ] Documentation Hub links work.
-* [ ] Previous/Next navigation works where used.
-* [ ] Contract links work.
-* [ ] Dashboard artifact links work.
-* [ ] No obsolete path is referenced.
+* [x] Every current document renders correctly in GitHub.
+* [x] Navigation links work.
+* [x] Documentation Hub links work.
+* [x] Previous/Next navigation works where used.
+* [x] Contract links work.
+* [x] Dashboard artifact links work.
+* [x] No obsolete path is referenced.
 * [x] Documentation consistently emphasizes Azure Data Engineering.
 * [x] Simulator details remain secondary.
 * [x] No document contradicts the current implementation.
@@ -597,9 +597,9 @@ dashboard exports
 screenshots
 ```
 
-* [ ] No secrets are committed.
+* [x] No secrets are committed in the current tracked tree.
 * [ ] No credentials exist in Git history intended for publication.
-* [ ] No private connection string remains.
+* [x] No private connection string remains in the current tracked tree.
 * [x] No public evidence exposes sensitive information.
 
 If a real secret was ever committed, simply deleting the current line is not sufficient; the credential must also be rotated.
@@ -669,15 +669,15 @@ git log --oneline -n 10
 
 Then verify:
 
-* [ ] Intended changes are committed.
-* [ ] Commit messages are understandable.
-* [ ] No accidental file deletion occurred.
-* [ ] No generated evidence was omitted unintentionally.
-* [ ] No temporary files were added.
+* [x] Intended changes are committed.
+* [x] Commit messages are understandable.
+* [x] No accidental file deletion occurred.
+* [x] No generated evidence was omitted unintentionally.
+* [x] No temporary files were added.
 * [ ] Local branch is synchronized with remote.
-* [ ] GitHub renders README correctly.
-* [ ] GitHub renders Markdown links correctly.
-* [ ] GitHub displays evidence correctly.
+* [x] GitHub renders README correctly.
+* [x] GitHub renders Markdown links correctly.
+* [x] GitHub displays evidence correctly.
 
 ---
 
@@ -728,12 +728,24 @@ Repository QA status:
 Open items:
 
 ```text
-1. Complete the remaining repository-wide navigation pass for contracts / public Markdown outside docs.
-2. Execute repository-wide secret-pattern searches.
-3. Run final Git hygiene and synchronization checks after all closeout edits.
-4. Validate README, Markdown navigation, evidence links, and images directly in GitHub.
-5. Complete Azure cost / cleanup / retention decision.
-6. Update the private portfolio roadmap after technical repository closeout.
+1. Review Git history for any credential or sensitive-data exposure predating the final public-safety scan.
+2. Pull the latest GitHub-authored closeout commits locally and confirm main is synchronized with origin/main.
+3. Confirm Azure cost stops accumulating after deletion once billing data refreshes.
+4. Update the private portfolio roadmap and record formal project closeout.
+```
+
+Completed during final public QA:
+
+```text
+Repository visibility          PUBLIC
+Root README / docs rendering   PASS
+Documentation navigation       PASS
+Contracts navigation           PASS
+Conceptual diagrams            PASS
+Evidence rendering             PASS
+Dashboard artifact visibility  PASS
+Current-tree secret scan       PASS
+Azure cleanup decision         COMPLETE
 ```
 
 Validated before this point:
