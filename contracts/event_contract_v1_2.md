@@ -1,4 +1,16 @@
+<p align="center">
+  <a href="event_contract_v1_1.md">← v1.1</a> |
+  <a href="../README.md">Home</a> |
+  <a href="../docs/README.md">Documentation</a> |
+  <a href="README.md">Contracts</a> |
+  <a href="../docs/README.md">Documentation →</a>
+</p>
+
+---
+
 # Synthetic Drone Event Contract v1.2
+
+**Status:** Current contract / active producer-consumer schema
 
 ## 1. Purpose
 
@@ -528,3 +540,13 @@ contracts/
 The JSON Schema is the normative machine-readable contract.
 
 This Markdown document provides the human-readable architectural and operational interpretation of that schema.
+
+---
+
+<p align="center">
+  <a href="event_contract_v1_1.md">← v1.1</a> |
+  <a href="../README.md">Home</a> |
+  <a href="../docs/README.md">Documentation</a> |
+  <a href="README.md">Contracts</a> |
+  <a href="../docs/README.md">Documentation →</a>
+</p>

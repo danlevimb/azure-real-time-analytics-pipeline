@@ -1,3 +1,13 @@
+<p align="center">
+  <a href="architecture_and_scope.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="simulator_and_event_model.md">Next →</a>
+</p>
+
+---
+
 # Implementation Plan
 
 **Project:** `azure-real-time-analytics-pipeline`
@@ -204,14 +214,328 @@ The system should preserve what actually arrived before attempting to determine 
 
 ---
 
+---
+
 ## 7. Phase 6 — Parsing and Structured Event Layers
 
 ### Objective
 
-Transform raw event payloads into queryable analytical structures.
+Transform raw event payloads into stable, typed analytical structures.
 
 ### Main deliverables
 
-* Parsing functions
-* Typed telemetry fields
-* Event meta
+* Event-family transform functions
+* `TelemetryParsed`
+* `StateTransitionsParsed`
+* `MaintenanceEventsParsed`
+* `StatusConfirmationsParsed`
+* Typed telemetry, state, identity, and timing fields
+* Analytical ingestion timestamp
+* Event Hubs metadata propagation
+
+### Validation focus
+
+Confirm that Raw events are parsed without losing the source identity, event-time, transport, communication, and run-level fields required downstream.
+
+---
+
+## 8. Phase 7 — Canonical Event Layer
+
+### Objective
+
+Separate physical delivery from logical event identity.
+
+### Main deliverables
+
+* Canonical materialized views
+* One canonical row per logical `event_id`
+* Canonical telemetry
+* Canonical state transitions
+* Canonical maintenance events
+* Canonical status confirmations
+* Duplicate-preserving Raw layer
+* Canonical deduplication validation
+
+### Engineering principle
+
+```text
+Raw answers:
+What physically arrived?
+
+Canonical answers:
+What unique logical events exist?
+```
+
+### Validation focus
+
+Use controlled duplicate delivery to prove that Raw and Parsed can contain repeated physical rows while Canonical preserves one logical event.
+
+---
+
+## 9. Phase 8 — Stream Integrity, Timeliness, and Reconciliation
+
+### Objective
+
+Measure whether the logical stream arrived correctly and how it arrived over time.
+
+### Main deliverables
+
+* Sequence-based integrity functions
+* Duplicate detection
+* Missing-sequence detection
+* Sequence-gap detection
+* Out-of-order detection
+* Event Hubs metadata completeness checks
+* Raw-to-Canonical reconciliation
+* Relative-delay metrics
+* Physical-arrival-gap metrics
+* Cloud-latency metrics
+* Burst detection
+* Windowed arrival metrics
+
+### Engineering principle
+
+```text
+Integrity ≠ Timeliness
+```
+
+A stream may be complete but late, or fast but incomplete.
+
+### Validation focus
+
+Execute clean and controlled degradation scenarios for:
+
+```text
+duplicate
+drop / missing sequence
+buffered reconnect
+out-of-order arrival
+burst behavior
+```
+
+and confirm that the analytical metrics describe the configured condition.
+
+---
+
+## 10. Phase 9 — State Reconstruction and Gold Serving
+
+### Objective
+
+Transform canonical event history into reusable current-state and serving models.
+
+### Main deliverables
+
+* `StateEvidence()`
+* `LatestStateEvidence()`
+* `FleetCurrentState()`
+* `LatestTelemetryObservation()`
+* Evidence precedence
+* Independent state domains
+* Controlled low-priority inference
+* `FleetOperationalView()`
+* `FleetOperationalSummary()`
+* `FleetMapView()`
+* Current-run wrapper functions
+
+### Engineering principle
+
+```text
+latest observation
+        ≠
+latest operational state
+```
+
+### Validation focus
+
+Confirm that explicit state transitions and status confirmations can remain authoritative after telemetry becomes stale or stops.
+
+---
+
+## 11. Phase 10 — Communication and Failure Scenarios
+
+### Objective
+
+Use controlled failure behavior to exercise the real-time analytical architecture under imperfect delivery conditions.
+
+### Main deliverables
+
+* Communication layer
+* Transport layer
+* RF failure scenarios
+* FIBER failure scenarios
+* Buffered reconnect
+* Drop
+* Duplicate
+* Extra delay
+* Reordered physical arrival
+* Terminal asset behavior
+* Mixed RF / FIBER fleet execution
+
+### Validation focus
+
+Confirm that injected conditions create measurable downstream effects without requiring separate Azure ingestion systems for each communication mode.
+
+---
+
+## 12. Phase 11 — Event Contract Evolution
+
+### Objective
+
+Evolve the producer / consumer contract while preserving explicit downstream propagation.
+
+### Main deliverables
+
+* Event Contract v1.1 migration
+* Event Contract v1.2 migration
+* `communication_mode`
+* `optic_fiber_remaining_m`
+* RF / FIBER conditional semantics
+* KQL propagation through Parsed and Canonical layers
+* Serving-layer propagation
+* Dashboard propagation
+* Versioned migration scripts
+
+### Validation focus
+
+Trace important contract fields from source event through Raw, Parsed, Canonical, Gold, and dashboard consumption.
+
+---
+
+## 13. Phase 12 — Dashboard and Operational Observability
+
+### Objective
+
+Expose operational state together with data-system health.
+
+### Main deliverables
+
+Four final pages:
+
+```text
+Operations
+Communications
+Stream Quality
+Drone Detail
+```
+
+The dashboard provides:
+
+* Fleet operational KPIs
+* Current-position map
+* Communication-mode distribution
+* Communication-health views
+* Stream integrity
+* Stream timeliness
+* Event volume and throughput
+* Burst diagnostics
+* Raw-to-Canonical reconciliation
+* Parameterized per-asset investigation
+* State-transition history
+* Unified event timeline
+
+### Design principle
+
+The dashboard is a presentation layer.
+
+Core state and reliability truth remains in reusable KQL analytical functions.
+
+---
+
+## 14. Phase 13 — Evidence and Public-Safety Validation
+
+### Objective
+
+Prove the principal Data Engineering claims with reviewed public artifacts.
+
+### Main deliverables
+
+* Event Hubs ingestion evidence
+* Raw / Parsed / Canonical evidence
+* Stream-quality evidence
+* State-reconstruction evidence
+* Gold-serving evidence
+* Failure-scenario evidence
+* Four dashboard evidence captures
+* Evidence checklist
+* Evidence index
+* Public-safe screenshot review
+* Sanitized dashboard export
+
+### Final evidence set
+
+```text
+33 reviewed screenshots
+across 6 capability folders
+```
+
+---
+
+## 15. Phase 14 — Documentation and Repository Closeout
+
+### Objective
+
+Convert the implemented system into a coherent, navigable, technically defensible public repository.
+
+### Main deliverables
+
+* Root project README
+* Documentation Hub
+* Architecture and scope
+* KQL architecture documentation
+* Stream-quality documentation
+* State-reconstruction documentation
+* Communications / failure documentation
+* Dashboard / observability documentation
+* Known limitations
+* Future improvements
+* Portfolio positioning
+* Final repository QA checklist
+* Project closeout checklist
+* Consistent Back / Home / Documentation / Evidence / Next navigation
+* Conceptual visual documentation
+
+### Closeout rule
+
+The repository should tell the Data Engineering story first.
+
+Simulator implementation detail remains supporting context.
+
+---
+
+## 16. Implementation Outcome
+
+The completed implementation can be summarized as:
+
+```text
+Controlled event generation
+        ↓
+Azure Event Hubs
+        ↓
+Raw evidence
+        ↓
+Typed KQL processing
+        ↓
+Canonical logical identity
+        ↓
+Integrity + Timeliness + Reconciliation
+        ↓
+State Reconstruction
+        ↓
+Gold Serving
+        ↓
+Operational Observability
+```
+
+The final project is therefore not simply a real-time visualization demo.
+
+It is an evidence-backed Azure Data Engineering pipeline designed to make imperfect event delivery understandable and analytically trustworthy.
+
+---
+
+<p align="center">
+  <a href="architecture_and_scope.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="simulator_and_event_model.md">Next →</a>
+</p>

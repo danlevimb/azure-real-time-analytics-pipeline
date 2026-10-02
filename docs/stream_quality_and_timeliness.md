@@ -1,10 +1,15 @@
+<p align="center">
+  <a href="streaming_and_kql_architecture.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="state_reconstruction_and_serving.md">Next →</a>
+</p>
+
+---
+
 # Stream Quality and Timeliness
 
-> **Documentation path:**
-> [Documentation Hub](README.md) →
-> [Streaming & KQL Architecture](streaming_and_kql_architecture.md) →
-> **Stream Quality & Timeliness** →
-> [State Reconstruction & Serving](state_reconstruction_and_serving.md)
 
 **Project:** `azure-real-time-analytics-pipeline`
 **Focus:** Real-time stream integrity, reconciliation, arrival behavior, and latency
@@ -582,7 +587,15 @@ The dashboard is therefore observing not only the simulated assets, but also the
 
 ## 17. Conceptual Quality Model
 
-A final diagram should visualize the distinction between logical integrity and physical arrival behavior.
+<p align="center">
+  <img src="../diagrams/02_stream_reliability.png" width="1000"/>
+</p>
+
+> **Conceptual guide:** visualizes the separation between logical stream integrity and physical arrival behavior while preserving the Raw-versus-Canonical distinction.
+
+
+
+The conceptual model below summarizes the distinction between logical integrity and physical arrival behavior.
 
 ```text
               PRODUCER
@@ -618,7 +631,6 @@ A final diagram should visualize the distinction between logical integrity and p
           STREAM HEALTH
 ```
 
-This diagram will later be added under `diagrams/`.
 
 ---
 
@@ -666,11 +678,10 @@ This moves the project beyond simple streaming ingestion into real-time **data r
 
 ---
 
-### Continue
-
-**Previous:** [Streaming and KQL Architecture](streaming_and_kql_architecture.md)
-**Documentation Hub:** [README](README.md)
-**Next:** [State Reconstruction and Serving](state_reconstruction_and_serving.md)
-
-**Related:** [Communications and Failure Scenarios](communications_and_failure_scenarios.md)
-**Supporting producer model:** [Simulator and Event Model](simulator_and_event_model.md)
+<p align="center">
+  <a href="streaming_and_kql_architecture.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="state_reconstruction_and_serving.md">Next →</a>
+</p>

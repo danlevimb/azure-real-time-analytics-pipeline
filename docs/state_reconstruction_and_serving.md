@@ -1,11 +1,15 @@
+<p align="center">
+  <a href="stream_quality_and_timeliness.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="communications_and_failure_scenarios.md">Next →</a>
+</p>
+
+---
+
 # State Reconstruction and Serving
 
-> **Documentation path:**
-> [Documentation Hub](README.md) →
-> [Streaming & KQL Architecture](streaming_and_kql_architecture.md) →
-> [Stream Quality & Timeliness](stream_quality_and_timeliness.md) →
-> **State Reconstruction & Serving** →
-> [Communications & Failure Scenarios](communications_and_failure_scenarios.md)
 
 **Project:** `azure-real-time-analytics-pipeline`
 **Focus:** Event-driven state reconstruction and reusable Gold serving interfaces
@@ -736,6 +740,14 @@ alone.
 
 ## 21. Serving Architecture
 
+<p align="center">
+  <img src="../diagrams/03_state_reconstruction.png" width="1000"/>
+</p>
+
+> **Conceptual guide:** shows how canonical event evidence is normalized, ranked, resolved into current state, kept separate from the latest telemetry observation, and exposed through Gold serving functions.
+
+
+
 The logical Gold flow is:
 
 ```text
@@ -763,7 +775,6 @@ Canonical Event Families
           Summary   Map    Dashboard
 ```
 
-A polished conceptual version of this flow will later be added under `diagrams/`.
 
 ---
 
@@ -821,11 +832,10 @@ This provides a stronger analytical foundation than simply querying the most rec
 
 ---
 
-### Continue
-
-**Previous:** [Stream Quality and Timeliness](stream_quality_and_timeliness.md)
-**Documentation Hub:** [README](README.md)
-**Next:** [Communications and Failure Scenarios](communications_and_failure_scenarios.md)
-
-**Related:** [Streaming and KQL Architecture](streaming_and_kql_architecture.md)
-**Later consumer:** [Dashboard and Observability](dashboard_and_observability.md)
+<p align="center">
+  <a href="stream_quality_and_timeliness.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="communications_and_failure_scenarios.md">Next →</a>
+</p>

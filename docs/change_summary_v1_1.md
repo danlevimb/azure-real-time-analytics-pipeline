@@ -1,4 +1,18 @@
+<p align="center">
+  <a href="README.md#implementation-history">← History Home</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="README.md#implementation-history">History Home</a> |
+  <a href="connectivity_fault_v1.md">Next →</a>
+</p>
+
+---
+
 # Change summary: Event Contract v1.1 + Connectivity Fault v1
+
+> **Historical implementation record — v1.1.**
+> This document preserves an earlier stage of the project and is not the current architecture or contract. Statements such as “next”, “not yet”, or “future” are scoped to that historical stage.
+> For the current implementation, start with the [Documentation Hub](README.md) and [Event Contract v1.2](../contracts/event_contract_v1_2.md).
 
 ## Scope completed
 
@@ -55,3 +69,13 @@ This change set closes the first producer-connectivity fault model and introduce
 - No onboard replay/buffer-on-reconnect implementation yet. That remains Connectivity Fault v2.
 - No automatic mission/connection behavior is attached to optical-fiber exhaustion yet.
 - No new dashboard visual tile was added before cloud schema migration and v1.1 data-path validation. Gold/serving views already expose the field for the next dashboard step.
+
+---
+
+<p align="center">
+  <a href="README.md#implementation-history">← History Home</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="README.md#implementation-history">History Home</a> |
+  <a href="connectivity_fault_v1.md">Next →</a>
+</p>

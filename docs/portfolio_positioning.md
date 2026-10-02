@@ -1,14 +1,19 @@
+<p align="center">
+  <a href="future_improvements.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="final_repository_qa_checklist.md">Next →</a>
+</p>
+
+---
+
 # Portfolio Positioning
 
-> **Documentation path:**
-> [Documentation Hub](README.md) →
-> [Known Limitations](known_limitations.md) →
-> [Future Improvements](future_improvements.md) →
-> **Portfolio Positioning**
 
 **Project:** `azure-real-time-analytics-pipeline`
 **Purpose:** Define the professional Data Engineering narrative supported by the project
-**Status:** Positioning prepared / final wording subject to evidence and repository QA
+**Status:** Positioning aligned with final evidence and README / final repository QA in progress
 
 ---
 
@@ -382,7 +387,7 @@ For a technical audience, expand the explanation:
 
 > I designed the project around the idea that physical event delivery and logical analytical truth are different concerns. Events enter through Azure Event Hubs and are preserved in a Raw layer with transport metadata. KQL transforms them into typed event-family tables and Canonical views deduplicated by logical `event_id`. Separate functions evaluate sequence integrity, Raw-to-Canonical reconciliation, latency, gaps, and burst behavior. Operational state is reconstructed from multiple canonical event families using event time, evidence priority, and source sequence rather than ingestion order. Gold serving functions combine reconstructed state with the latest telemetry observation and expose stable interfaces to the dashboard.
 
-This should be backed by real evidence before being used as a final public claim.
+This explanation is backed by the final evidence set and should remain aligned with the public repository artifacts.
 
 ---
 
@@ -404,7 +409,7 @@ with canonical events, stream reliability, state reconstruction,
 Gold serving, failure scenarios, and operational observability.
 ```
 
-Final wording should be reviewed during README closeout.
+This wording is aligned with the final README direction and should remain consistent during final repository QA.
 
 ---
 
@@ -581,7 +586,7 @@ and operational analytical state.
 
 # 17. Capability Added to the Portfolio
 
-After formal closeout, the capability matrix can move:
+After final repository closeout, the capability matrix can move:
 
 ```text
 Real-time analytics
@@ -698,7 +703,7 @@ This aligns the project naturally with Data Infrastructure and Data Reliability 
 
 Professional positioning must remain evidence-backed.
 
-Before final publication, each major claim should map to:
+Each major public claim should map to:
 
 ```text
 Implementation
@@ -760,20 +765,20 @@ Then position publicly
 
 # 23. Recommended Final Status
 
-Only after evidence and QA are complete should the project be described as:
+The technical implementation, evidence set, dashboard artifact, and core documentation are complete.
+
+Until final repository QA, cleanup, and roadmap closeout are finished, the accurate status is:
+
+```text
+Technical implementation and evidence complete
+Final repository closeout in progress
+```
+
+After those final checks, the project can be described as:
 
 ```text
 Completed / portfolio-ready MVP closed
 ```
-
-Until then:
-
-```text
-Technical implementation complete
-Closeout in progress
-```
-
-is the more accurate status.
 
 ---
 
@@ -805,14 +810,10 @@ That is the portfolio value of the project.
 
 ---
 
-### Navigation
-
-**Previous:** [Future Improvements](future_improvements.md)
-**Documentation Hub:** [README](README.md)
-
-**Related:**
-[Architecture and Scope](architecture_and_scope.md)
-[Streaming and KQL Architecture](streaming_and_kql_architecture.md)
-[Stream Quality and Timeliness](stream_quality_and_timeliness.md)
-[State Reconstruction and Serving](state_reconstruction_and_serving.md)
-[Evidence Index](evidence_index.md)
+<p align="center">
+  <a href="future_improvements.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="final_repository_qa_checklist.md">Next →</a>
+</p>

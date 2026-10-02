@@ -1,12 +1,15 @@
+<p align="center">
+  <a href="communications_and_failure_scenarios.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="evidence_checklist.md">Next →</a>
+</p>
+
+---
+
 # Dashboard and Observability
 
-> **Documentation path:**
-> [Documentation Hub](README.md) →
-> [Streaming & KQL Architecture](streaming_and_kql_architecture.md) →
-> [Stream Quality & Timeliness](stream_quality_and_timeliness.md) →
-> [State Reconstruction & Serving](state_reconstruction_and_serving.md) →
-> [Communications & Failure Scenarios](communications_and_failure_scenarios.md) →
-> **Dashboard & Observability**
 
 **Project:** `azure-real-time-analytics-pipeline`
 **Focus:** Operational visualization of Gold serving data, stream reliability, reconciliation, and communications observability
@@ -124,27 +127,28 @@ Diagnostic visuals may still query Raw or Canonical layers directly when the pur
 
 # 4. Current Dashboard Structure
 
-The current dashboard contains three primary pages:
+The final dashboard contains four analytical pages:
 
 ```text
 Operations
+Communications
 Stream Quality
-DRN-001
+Drone Detail
 ```
-
-The third page is a parameterized asset-detail view despite retaining the historical `DRN-001` page name.
 
 Conceptually:
 
 ```text
-                DASHBOARD
-                    │
-        ┌───────────┼───────────┐
-        ↓           ↓           ↓
-   Operations   Stream Quality  Asset Detail
+                         DASHBOARD
+                             │
+          ┌──────────────┬───┴───────────┬──────────────┐
+          ↓              ↓               ↓              ↓
+     Operations    Communications   Stream Quality   Drone Detail
 ```
 
-Each page serves a different analytical purpose.
+Each page serves a distinct operational or Data Engineering purpose.
+
+The dashboard also exposes the current `RunId` globally for analyst context and traceability. Visuals intentionally resolve the active dataset through `LatestObservedRun()` and reusable `Current*` functions; the visible RunId control is not used as a query filter.
 
 ---
 
@@ -283,7 +287,17 @@ Freshness becomes part of observability rather than an invisible implementation 
 
 ---
 
-# 9. Communications Observability
+# 9. Communications Page and Observability
+
+The **Communications** page exposes communication-path health as a dedicated analytical surface.
+
+Its reusable analytical interfaces include:
+
+```text
+CurrentCommunicationHealthSummary()
+CurrentCommunicationHealthView()
+CurrentLinkStateEventsView()
+```
 
 Communication mode is propagated through the Gold serving layer and displayed operationally.
 
@@ -505,7 +519,9 @@ LastSeenAt
 
 This is important because the analytical database may contain multiple historical simulator runs.
 
-Dashboard visuals generally operate against the most recently observed run rather than hard-coded Run IDs.
+The dashboard displays the current RunId globally as context for the analyst.
+
+Dashboard visuals intentionally resolve the active dataset through `LatestObservedRun()` and reusable `Current*` functions rather than using the visible RunId control as a query filter.
 
 ---
 
@@ -620,7 +636,7 @@ This makes canonicalization problems traceable to a smaller analytical scope ins
 
 ---
 
-# 20. Asset Detail Page
+# 20. Drone Detail Page
 
 The current detail page uses a dashboard parameter:
 
@@ -630,7 +646,7 @@ _droneId
 
 The selectable asset values are populated from canonical telemetry for the current run.
 
-This converts what originally began as a `DRN-001` dashboard page into a reusable per-asset analytical view.
+The final page is named **Drone Detail** and provides a reusable per-asset analytical view.
 
 Conceptually:
 
@@ -866,7 +882,15 @@ Schema evolution therefore affects the full Data Engineering lifecycle, not only
 
 # 28. Conceptual Observability Diagram
 
-A final polished diagram should show how observability is derived from multiple analytical layers.
+<p align="center">
+  <img src="../diagrams/05_operational_command_center.png" width="1000"/>
+</p>
+
+> **Conceptual guide:** illustrates the operational value created when reliable ingestion, KQL processing, serving, communications context, and stream-health analytics are presented together.
+
+
+
+The conceptual command-center view above communicates the operational value of the analytical product; the dependency model below shows how those views derive from the underlying data layers.
 
 ```text
               Azure Event Hubs
@@ -887,9 +911,9 @@ A final polished diagram should show how observability is derived from multiple 
                      ↓
                 DASHBOARD
                      │
-        ┌────────────┼────────────┐
-        ↓            ↓            ↓
-   Operations   Stream Quality  Detail
+      ┌──────────────┼──────────────┬──────────────┐
+      ↓              ↓              ↓              ↓
+ Operations   Communications   Stream Quality   Drone Detail
 ```
 
 The emphasis should remain on **analytical dependencies**, not dashboard aesthetics.
@@ -969,14 +993,10 @@ That makes the dashboard an observability surface for the **data system itself**
 
 ---
 
-### Navigation
-
-**Previous:** [Communications and Failure Scenarios](communications_and_failure_scenarios.md)
-**Documentation Hub:** [README](README.md)
-
-**Related:**
-[Streaming and KQL Architecture](streaming_and_kql_architecture.md)
-[Stream Quality and Timeliness](stream_quality_and_timeliness.md)
-[State Reconstruction and Serving](state_reconstruction_and_serving.md)
-
-**Implementation artifact:** [`../dashboards/rtd-drone-operations.json`](../dashboards/rtd-drone-operations.json)
+<p align="center">
+  <a href="communications_and_failure_scenarios.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="evidence_checklist.md">Next →</a>
+</p>

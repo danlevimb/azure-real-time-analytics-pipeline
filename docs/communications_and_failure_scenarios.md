@@ -1,12 +1,15 @@
+<p align="center">
+  <a href="state_reconstruction_and_serving.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="dashboard_and_observability.md">Next →</a>
+</p>
+
+---
+
 # Communications and Failure Scenarios
 
-> **Documentation path:**
-> [Documentation Hub](README.md) →
-> [Streaming & KQL Architecture](streaming_and_kql_architecture.md) →
-> [Stream Quality & Timeliness](stream_quality_and_timeliness.md) →
-> [State Reconstruction & Serving](state_reconstruction_and_serving.md) →
-> **Communications & Failure Scenarios** →
-> [Dashboard & Observability](dashboard_and_observability.md)
 
 **Project:** `azure-real-time-analytics-pipeline`
 **Focus:** Controlled stream degradation and failure injection for Azure real-time pipeline validation
@@ -642,7 +645,15 @@ The Data Engineering behavior is the actual project result.
 
 # 19. Conceptual Failure Diagram
 
-A final documentation diagram should visualize the relationship between failure injection and Azure detection.
+<p align="center">
+  <img src="../diagrams/04_failure_to_observability.png" width="1000"/>
+</p>
+
+> **Conceptual guide:** connects deterministic failure injection to observable stream behavior, KQL detection, state interpretation, and dashboard-level operational visibility.
+
+
+
+The visual above summarizes the relationship between failure injection, Azure/KQL detection, and operational interpretation.
 
 ```text
                EVENT PRODUCER
@@ -678,7 +689,7 @@ A final documentation diagram should visualize the relationship between failure 
                   Dashboard
 ```
 
-This diagram should emphasize the **data path**, not the physical failure mechanism.
+The emphasis remains on the **data path and analytical consequence**, not on modeling the physical failure mechanism in engineering detail.
 
 ---
 
@@ -732,12 +743,10 @@ That capability is central to building trustworthy real-time Data Engineering sy
 
 ---
 
-### Continue
-
-**Previous:** [State Reconstruction and Serving](state_reconstruction_and_serving.md)
-**Documentation Hub:** [README](README.md)
-**Next:** [Dashboard and Observability](dashboard_and_observability.md)
-
-**Related:** [Stream Quality and Timeliness](stream_quality_and_timeliness.md)
-**Architecture overview:** [Streaming and KQL Architecture](streaming_and_kql_architecture.md)
-**Supporting producer:** [Simulator and Event Model](simulator_and_event_model.md)
+<p align="center">
+  <a href="state_reconstruction_and_serving.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="dashboard_and_observability.md">Next →</a>
+</p>

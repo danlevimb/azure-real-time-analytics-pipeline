@@ -1,4 +1,18 @@
+<p align="center">
+  <a href="connectivity_fault_v1.md">← Previous</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="README.md#implementation-history">History Home</a> |
+  <a href="local_validation_v1_1.md">Next →</a>
+</p>
+
+---
+
 # Event Contract v1.1 rollout
+
+> **Historical implementation record — v1.1.**
+> This document preserves an earlier stage of the project and is not the current architecture or contract. Statements such as “next”, “not yet”, or “future” are scoped to that historical stage.
+> For the current implementation, start with the [Documentation Hub](README.md) and [Event Contract v1.2](../contracts/event_contract_v1_2.md).
 
 ## Change
 
@@ -71,3 +85,13 @@ Use:
 ```
 
 The configuration uses a new `RunId` so it does not overwrite the previous connectivity run.
+
+---
+
+<p align="center">
+  <a href="connectivity_fault_v1.md">← Previous</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="README.md#implementation-history">History Home</a> |
+  <a href="local_validation_v1_1.md">Next →</a>
+</p>

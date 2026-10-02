@@ -1,4 +1,18 @@
+<p align="center">
+  <a href="change_summary_v1_1.md">← Previous</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="README.md#implementation-history">History Home</a> |
+  <a href="event_contract_v1_1_rollout.md">Next →</a>
+</p>
+
+---
+
 # Connectivity Fault v1
+
+> **Historical implementation record — v1.1.**
+> This document preserves an earlier stage of the project and is not the current architecture or contract. Statements such as “next”, “not yet”, or “future” are scoped to that historical stage.
+> For the current implementation, start with the [Documentation Hub](README.md) and [Event Contract v1.2](../contracts/event_contract_v1_2.md).
 
 ## Goal
 
@@ -37,3 +51,13 @@ Onboard buffering, reconnect backlog flush, burst delivery, and late-event analy
 - extra delay
 
 A communications outage is therefore distinct from a transport fault.
+
+---
+
+<p align="center">
+  <a href="change_summary_v1_1.md">← Previous</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="README.md#implementation-history">History Home</a> |
+  <a href="event_contract_v1_1_rollout.md">Next →</a>
+</p>

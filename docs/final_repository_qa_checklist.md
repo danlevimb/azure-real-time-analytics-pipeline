@@ -1,15 +1,19 @@
+<p align="center">
+  <a href="portfolio_positioning.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="project_closeout_checklist.md">Next →</a>
+</p>
+
+---
+
 # Final Repository QA Checklist
 
-> **Documentation path:**
-> [Documentation Hub](README.md) →
-> [Evidence Checklist](evidence_checklist.md) →
-> [Evidence Index](evidence_index.md) →
-> **Final Repository QA Checklist** →
-> [Project Closeout Checklist](project_closeout_checklist.md)
 
 **Project:** `azure-real-time-analytics-pipeline`
 **Purpose:** Final technical, documentation, evidence, Git, and public-safety validation
-**Status:** Pending final QA execution
+**Status:** QA in progress — technical, evidence, dashboard, and artifact validation complete; final public-repository checks remain
 
 ---
 
@@ -82,16 +86,16 @@ simulator/
 tests/
 ```
 
-* [ ] `contracts/` contains versioned event contracts.
-* [ ] `dashboards/` contains the dashboard export.
-* [ ] `docs/` contains current project documentation.
-* [ ] `docs/README.md` provides documentation navigation.
-* [ ] `evidence/` contains only reviewed public evidence.
-* [ ] `kql/` contains the analytical implementation.
-* [ ] `scripts/` contains useful execution/support scripts.
-* [ ] `simulator/` remains clearly identifiable as supporting infrastructure.
-* [ ] Test artifacts are organized and understandable.
-* [ ] Repository structure reinforces the Data Engineering story.
+* [x] `contracts/` contains versioned event contracts.
+* [x] `dashboards/` contains the dashboard export.
+* [x] `docs/` contains current project documentation.
+* [x] `docs/README.md` provides documentation navigation.
+* [x] `evidence/` contains only reviewed public evidence.
+* [x] `kql/` contains the analytical implementation.
+* [x] `scripts/` contains useful execution/support scripts.
+* [x] `simulator/` remains clearly identifiable as supporting infrastructure.
+* [x] Test artifacts are organized and understandable.
+* [x] Repository structure reinforces the Data Engineering story.
 
 ---
 
@@ -107,15 +111,15 @@ v1.1
 v1.2
 ```
 
-* [ ] `event_contract_v1_0.schema.json` exists.
-* [ ] `event_contract_v1_1.schema.json` exists.
-* [ ] `event_contract_v1_2.schema.json` exists.
-* [ ] Contract Markdown documentation is present where intended.
-* [ ] `event_contract_v1_2.md` accurately describes the current schema.
-* [ ] Contract links resolve correctly.
-* [ ] v1.2 communication-mode semantics are documented.
-* [ ] RF and FIBER conditional behavior is represented accurately.
-* [ ] No documentation claims fields unsupported by the actual contract.
+* [x] `event_contract_v1_0.schema.json` exists.
+* [x] `event_contract_v1_1.schema.json` exists.
+* [x] `event_contract_v1_2.schema.json` exists.
+* [x] Contract Markdown documentation is present where intended.
+* [x] `event_contract_v1_2.md` accurately describes the current schema.
+* [x] Contract links resolve correctly.
+* [x] v1.2 communication-mode semantics are documented.
+* [x] RF and FIBER conditional behavior is represented accurately.
+* [x] No documentation claims fields unsupported by the actual contract.
 
 ### Related documentation
 
@@ -140,18 +144,18 @@ Verify that the complete analytical sequence exists:
 10_contract_v1_2_migration.kql
 ```
 
-* [ ] All expected KQL files are present.
-* [ ] Numbering reflects logical dependency order.
-* [ ] Raw table definitions are current.
-* [ ] Transform functions reflect current event-contract fields.
-* [ ] Update policies reference valid tables/functions.
-* [ ] Canonical materialized views are valid.
-* [ ] Quality functions execute successfully.
-* [ ] State reconstruction functions execute successfully.
-* [ ] Serving functions execute successfully.
-* [ ] Timeliness/performance functions execute successfully.
-* [ ] v1.1 migration remains historically coherent.
-* [ ] v1.2 migration propagates current contract fields correctly.
+* [x] All expected KQL files are present.
+* [x] Numbering reflects logical dependency order.
+* [x] Raw table definitions are current.
+* [x] Transform functions reflect current event-contract fields.
+* [x] Update policies reference valid tables/functions.
+* [x] Canonical materialized views are valid.
+* [x] Quality functions execute successfully.
+* [x] State reconstruction functions execute successfully.
+* [x] Serving functions execute successfully.
+* [x] Timeliness/performance functions execute successfully.
+* [x] v1.1 migration remains historically coherent.
+* [x] v1.2 migration propagates current contract fields correctly.
 
 ---
 
@@ -188,14 +192,14 @@ optic_fiber_remaining_m
 
 verify:
 
-* [ ] Field exists in the source event.
-* [ ] Field reaches Raw ingestion.
-* [ ] Field is extracted by the KQL transform.
-* [ ] Field exists in the parsed analytical layer.
-* [ ] Field survives canonicalization.
-* [ ] Field reaches serving functions where applicable.
-* [ ] Field is usable by dashboard queries.
-* [ ] RF nullability / FIBER applicability remain semantically correct.
+* [x] Field exists in the source event.
+* [x] Field reaches Raw ingestion.
+* [x] Field is extracted by the KQL transform.
+* [x] Field exists in the parsed analytical layer.
+* [x] Field survives canonicalization.
+* [x] Field reaches serving functions where applicable.
+* [x] Field is usable by dashboard queries.
+* [x] RF nullability / FIBER applicability remain semantically correct.
 
 No field should appear in the dashboard only because of undocumented ad-hoc logic.
 
@@ -205,16 +209,16 @@ No field should appear in the dashboard only because of undocumented ad-hoc logi
 
 Using a known cloud-enabled run:
 
-* [ ] Simulator successfully publishes to Azure Event Hubs.
-* [ ] `RawDroneEvents` receives the expected run.
-* [ ] `simulator_run_id` is populated.
-* [ ] `event_id` is populated.
-* [ ] `event_type` is populated.
-* [ ] `source_sequence_number` is populated.
-* [ ] `eh_enqueued_time` is populated.
-* [ ] `eh_sequence_number` is populated.
-* [ ] `eh_offset` is populated.
-* [ ] No unexpected null Event Hubs metadata appears in the clean baseline.
+* [x] Simulator successfully publishes to Azure Event Hubs.
+* [x] `RawDroneEvents` receives the expected run.
+* [x] `simulator_run_id` is populated.
+* [x] `event_id` is populated.
+* [x] `event_type` is populated.
+* [x] `source_sequence_number` is populated.
+* [x] `eh_enqueued_time` is populated.
+* [x] `eh_sequence_number` is populated.
+* [x] `eh_offset` is populated.
+* [x] No unexpected null Event Hubs metadata appears in the clean baseline.
 
 Evidence should be captured during this validation.
 
@@ -228,12 +232,12 @@ See:
 
 Validate the distinction between physical and logical events.
 
-* [ ] Clean runs preserve all expected logical events.
-* [ ] Duplicate physical deliveries remain visible in Raw.
-* [ ] Duplicate physical deliveries collapse to one canonical `event_id`.
-* [ ] Canonical tables do not introduce unexpected duplicates.
-* [ ] Raw unique-event counts reconcile with Canonical unique-event counts.
-* [ ] Per-asset reconciliation identifies no unexplained differences.
+* [x] Clean runs preserve all expected logical events.
+* [x] Duplicate physical deliveries remain visible in Raw.
+* [x] Duplicate physical deliveries collapse to one canonical `event_id`.
+* [x] Canonical tables do not introduce unexpected duplicates.
+* [x] Raw unique-event counts reconcile with Canonical unique-event counts.
+* [x] Per-asset reconciliation identifies no unexplained differences.
 
 Expected principle:
 
@@ -259,18 +263,18 @@ Validate representative scenarios.
 
 ### Clean baseline
 
-* [ ] Duplicate count is expected.
-* [ ] Missing sequence count is expected.
-* [ ] Sequence gaps are expected.
-* [ ] Out-of-order count is expected.
-* [ ] Null Event Hubs metadata is expected.
+* [x] Duplicate count is expected.
+* [x] Missing sequence count is expected.
+* [x] Sequence gaps are expected.
+* [x] Out-of-order count is expected.
+* [x] Null Event Hubs metadata is expected.
 
 ### Controlled degradation
 
-* [ ] Duplicate scenario is detected.
-* [ ] Missing/drop scenario is detected.
-* [ ] Out-of-order behavior is detectable where injected.
-* [ ] Results correspond to the intentionally configured failure.
+* [x] Duplicate scenario is detected.
+* [x] Missing/drop scenario is detected.
+* [x] Out-of-order behavior is detectable where injected.
+* [x] Results correspond to the intentionally configured failure.
 
 The goal is not for every metric to be zero.
 
@@ -288,12 +292,12 @@ CurrentStreamTimelinessReport()
 
 Verify:
 
-* [ ] Relative-delay metrics are returned.
-* [ ] Physical-gap metric is returned.
-* [ ] Cloud-latency metrics are returned.
-* [ ] Burst information is returned where applicable.
-* [ ] Buffered/reconnect scenarios produce explainable timeliness degradation.
-* [ ] Clean baseline differs meaningfully from intentional degradation.
+* [x] Relative-delay metrics are returned.
+* [x] Physical-gap metric is returned.
+* [x] Cloud-latency metrics are returned.
+* [x] Burst information is returned where applicable.
+* [x] Buffered/reconnect scenarios produce explainable timeliness degradation.
+* [x] Clean baseline differs meaningfully from intentional degradation.
 
 Confirm the central distinction:
 
@@ -316,14 +320,14 @@ FleetCurrentState()
 LatestTelemetryObservation()
 ```
 
-* [ ] Multiple canonical event families contribute evidence.
-* [ ] Evidence ranking behaves as designed.
-* [ ] State is ordered primarily by event semantics/time rather than ingestion order.
-* [ ] State domains resolve independently.
-* [ ] Controlled inference does not override stronger explicit evidence.
-* [ ] Latest telemetry observation is independently available.
-* [ ] Disconnection can remain visible after telemetry becomes stale.
-* [ ] Terminal-state behavior remains visible after telemetry stops.
+* [x] Multiple canonical event families contribute evidence.
+* [x] Evidence ranking behaves as designed.
+* [x] State is ordered primarily by event semantics/time rather than ingestion order.
+* [x] State domains resolve independently.
+* [x] Controlled inference does not override stronger explicit evidence.
+* [x] Latest telemetry observation is independently available.
+* [x] Disconnection can remain visible after telemetry becomes stale.
+* [x] Terminal-state behavior remains visible after telemetry stops.
 
 Capture at least one case where:
 
@@ -345,45 +349,48 @@ CurrentFleetOperationalSummary()
 CurrentFleetMapView()
 ```
 
-* [ ] Operational view returns expected asset population.
-* [ ] State fields are populated appropriately.
-* [ ] Observation fields are populated appropriately.
-* [ ] `communication_mode` is present.
-* [ ] FIBER-specific fields behave correctly.
-* [ ] RF records do not falsely imply fiber state.
-* [ ] State timestamps are available.
-* [ ] Telemetry timestamps are available.
-* [ ] Freshness/age values are meaningful.
-* [ ] Fleet summary KPIs reconcile with detailed rows.
-* [ ] Map-serving output is dashboard-ready.
+* [x] Operational view returns expected asset population.
+* [x] State fields are populated appropriately.
+* [x] Observation fields are populated appropriately.
+* [x] `communication_mode` is present.
+* [x] FIBER-specific fields behave correctly.
+* [x] RF records do not falsely imply fiber state.
+* [x] State timestamps are available.
+* [x] Telemetry timestamps are available.
+* [x] Freshness/age values are meaningful.
+* [x] Fleet summary KPIs reconcile with detailed rows.
+* [x] Map-serving output is dashboard-ready.
 
 ---
 
 # 13. Failure Scenario QA
 
-Representative scenarios should be verified, not every configuration file.
+Representative scenarios are verified; final QA does **not** require every simulator configuration to have a public screenshot.
 
-### Transport
+### Transport / delivery
 
-* [ ] Extra-delay scenario behaves as intended.
-* [ ] Drop scenario behaves as intended.
-* [ ] Duplicate scenario behaves as intended.
-* [ ] Buffered/reconnect scenario behaves as intended.
+* [x] Drop / missing-event behavior is observable.
+* [x] Duplicate delivery behavior is observable.
+* [x] Buffered/reconnect behavior is observable.
+* [x] Reconnect can produce explainable out-of-order/timeliness effects.
+* [ ] Standalone extra-delay evidence is optional and non-blocking.
 
 ### Communications
 
-* [ ] RF failure produces the intended downstream effect.
-* [ ] FIBER link-loss behavior is observable.
-* [ ] FIBER terminal-cut behavior is observable if retained in final scope.
-* [ ] Fiber exhaustion produces the intended disconnected state.
-* [ ] Mixed RF/FIBER runs remain analytically coherent.
+* [x] FIBER link-loss behavior is observable.
+* [x] Disconnect/reconnect state transitions are explicit.
+* [x] Mixed RF/FIBER runs remain analytically coherent.
+* [x] Failure isolation is demonstrated: one targeted FIBER asset can fail while unaffected RF and FIBER assets remain connected.
+* [ ] Additional RF-jammer evidence is optional and non-blocking.
+* [ ] Fiber-exhaustion evidence is optional and non-blocking.
+* [ ] FIBER terminal-cut evidence is optional if not retained in the final evidence story.
 
 ### Terminal source
 
-* [ ] Terminal asset produces explicit terminal-state evidence.
-* [ ] Telemetry stops as intended.
-* [ ] Last known observation remains usable downstream.
-* [ ] Gold state remains operationally meaningful.
+* [x] Terminal destruction produces explicit terminal-state evidence.
+* [x] Mission abort and disconnection are represented downstream.
+* [x] Last-known observation remains usable.
+* [x] Fleet-level serving reflects terminal/asset-loss impact.
 
 Related:
 
@@ -393,40 +400,62 @@ Related:
 
 # 14. Dashboard QA
 
-Validate the versioned dashboard artifact:
+Validate the versioned public dashboard artifact:
 
 ```text
 dashboards/rtd-drone-operations.json
 ```
 
+The final export contains:
+
+```text
+Operations
+Communications
+Stream Quality
+Drone Detail
+```
+
 ## Operations
 
-* [ ] Fleet map renders correctly.
-* [ ] Operational KPIs render correctly.
-* [ ] Connectivity values are correct.
-* [ ] Mission completion values are correct.
-* [ ] Platform health values are correct.
-* [ ] RF/FIBER metrics render correctly.
-* [ ] Disconnected assets can be identified.
-* [ ] Telemetry freshness is visible where intended.
+* [x] Fleet map renders correctly.
+* [x] Operational KPIs render correctly.
+* [x] Connectivity values are correct.
+* [x] Mission completion values are correct.
+* [x] Platform health values are correct.
+* [x] RF/FIBER metrics render correctly.
+* [x] Operational detail is available.
+* [x] Connectivity and terminal exceptions can be identified when present.
+
+## Communications
+
+* [x] Communication-health summary renders correctly.
+* [x] Unaffected / affected link metrics render correctly.
+* [x] Current disconnect and out-of-order indicators render correctly.
+* [x] Communication-condition summary renders correctly.
+* [x] RF/FIBER link-mode distribution renders correctly.
+* [x] Affected-link and link-state-event surfaces are available.
 
 ## Stream Quality
 
-* [ ] Integrity metrics render correctly.
-* [ ] Timeliness metrics render correctly.
-* [ ] Latest observed run is correct.
-* [ ] Raw/Canonical reconciliation renders correctly.
-* [ ] Event-volume metrics render correctly.
-* [ ] Burst information renders where appropriate.
+* [x] Integrity metrics render correctly.
+* [x] Timeliness metrics render correctly.
+* [x] Current RunId is visible for analyst context.
+* [x] Raw/Canonical reconciliation renders correctly.
+* [x] Event-volume / throughput metrics render correctly.
+* [x] Burst information renders where appropriate.
+* [x] Window throughput and window timeliness render correctly.
 
-## Asset Detail
+> **Intentional design:** RunId is exposed globally as context/traceability. Dashboard visuals resolve the active run through `LatestObservedRun()` and reusable `Current*` functions; the RunId control is not a query filter.
 
-* [ ] `_droneId` selector works.
-* [ ] Selector values are populated dynamically.
-* [ ] Telemetry history responds to the selected asset.
-* [ ] State-transition history responds to the selected asset.
-* [ ] Unified event timeline responds to the selected asset.
-* [ ] Logical sequence ordering is understandable.
+## Drone Detail
+
+* [x] `_droneId` selector works.
+* [x] Selector values are populated dynamically.
+* [x] Current-position and trajectory maps render correctly.
+* [x] Flight profile responds to the selected asset.
+* [x] State-transition history responds to the selected asset.
+* [x] Unified event timeline responds to the selected asset.
+* [x] Logical sequence ordering is understandable.
 
 ---
 
@@ -434,14 +463,14 @@ dashboards/rtd-drone-operations.json
 
 Because the dashboard export contains implementation metadata:
 
-* [ ] Review cluster URI.
-* [ ] Review database identifiers.
-* [ ] Review workspace identifiers.
-* [ ] Review embedded query text.
-* [ ] Verify no credential or access token exists.
-* [ ] Sanitize identifiers only where required.
-* [ ] Confirm sanitization does not break the value of the public artifact.
-* [ ] Re-export if a cleaner artifact is preferable to manual modification.
+* [x] Cluster URI reviewed.
+* [x] Database identifiers reviewed.
+* [x] Workspace identifier reviewed.
+* [x] Embedded query text reviewed.
+* [x] No credential or access token is present.
+* [x] Environment-specific Fabric/Kusto identifiers are replaced with public placeholders.
+* [x] Pages, parameters, visual definitions, and KQL remain intact after sanitization.
+* [x] Final public artifact preserves its documentation value.
 
 Never assume that a JSON dashboard export is automatically public-safe.
 
@@ -473,10 +502,10 @@ final_repository_qa_checklist.md
 * [ ] Contract links work.
 * [ ] Dashboard artifact links work.
 * [ ] No obsolete path is referenced.
-* [ ] Documentation consistently emphasizes Azure Data Engineering.
-* [ ] Simulator details remain secondary.
-* [ ] No document contradicts the current implementation.
-* [ ] No document claims functionality outside the implemented MVP.
+* [x] Documentation consistently emphasizes Azure Data Engineering.
+* [x] Simulator details remain secondary.
+* [x] No document contradicts the current implementation.
+* [x] No document claims functionality outside the implemented MVP.
 
 ---
 
@@ -493,11 +522,11 @@ event_contract_v1_1_rollout.md
 local_validation_v1_1.md
 ```
 
-* [ ] Historical documents are still useful.
-* [ ] They are clearly distinguishable from current architecture documentation.
-* [ ] They do not appear to represent the current contract accidentally.
-* [ ] Documentation Hub classifies them appropriately.
-* [ ] Obsolete material that creates confusion is removed only if no longer useful.
+* [x] Historical documents are still useful.
+* [x] They are clearly distinguishable from current architecture documentation.
+* [x] They do not appear to represent the current contract accidentally.
+* [x] Documentation Hub classifies them appropriately.
+* [x] Obsolete material that creates confusion is removed only if no longer useful.
 
 Historical documentation should preserve evolution without competing with the current project story.
 
@@ -507,17 +536,17 @@ Historical documentation should preserve evolution without competing with the cu
 
 Before closeout:
 
-* [ ] Required evidence has been captured.
-* [ ] Evidence filenames follow the planned convention.
-* [ ] Every image is readable.
-* [ ] Every image supports a specific claim.
-* [ ] No screenshot exists only for decoration.
-* [ ] Evidence Index points to actual files.
-* [ ] Evidence Index statuses are current.
-* [ ] No personal information is visible.
-* [ ] No credentials or secrets are visible.
-* [ ] Azure identifiers have been reviewed.
-* [ ] Strong Data Engineering evidence appears first.
+* [x] Required evidence has been captured.
+* [x] Evidence filenames follow the planned convention.
+* [x] Every image is readable.
+* [x] Every image supports a specific claim.
+* [x] No screenshot exists only for decoration.
+* [x] Evidence Index points to actual files.
+* [x] Evidence Index statuses are current.
+* [x] No personal information is visible.
+* [x] No credentials or secrets are visible.
+* [x] Azure identifiers have been reviewed.
+* [x] Strong Data Engineering evidence appears first.
 
 Related:
 
@@ -571,7 +600,7 @@ screenshots
 * [ ] No secrets are committed.
 * [ ] No credentials exist in Git history intended for publication.
 * [ ] No private connection string remains.
-* [ ] No public evidence exposes sensitive information.
+* [x] No public evidence exposes sensitive information.
 
 If a real secret was ever committed, simply deleting the current line is not sufficient; the credential must also be rotated.
 
@@ -583,14 +612,14 @@ The root `README.md` should be finalized **after** technical and evidence QA.
 
 Before writing the final README:
 
-* [ ] Technical scope is frozen.
-* [ ] Current architecture is verified.
-* [ ] Evidence set is substantially complete.
-* [ ] Documentation paths are final.
-* [ ] Known limitations are understood.
-* [ ] Repository structure is stable.
-* [ ] Principal screenshots are selected.
-* [ ] Final public claims are evidence-backed.
+* [x] Technical scope is frozen.
+* [x] Current architecture is verified.
+* [x] Evidence set is substantially complete.
+* [x] Documentation paths are final.
+* [x] Known limitations are understood.
+* [x] Repository structure is stable.
+* [x] Principal screenshots are selected.
+* [x] Final public claims are evidence-backed.
 
 The root README should summarize the implemented system rather than introducing new claims during closeout.
 
@@ -618,13 +647,13 @@ Operational observability
 
 Verify:
 
-* [ ] The project is clearly positioned as Data Engineering.
-* [ ] Drone simulation is clearly a synthetic test domain.
-* [ ] Failure injection supports reliability testing.
-* [ ] Azure/KQL architecture remains the main story.
-* [ ] The project does not read like a drone-simulation project.
-* [ ] The project does not read like only a dashboard project.
-* [ ] Claims are understandable to a Data Engineer or technical interviewer.
+* [x] The project is clearly positioned as Data Engineering.
+* [x] Drone simulation is clearly a synthetic test domain.
+* [x] Failure injection supports reliability testing.
+* [x] Azure/KQL architecture remains the main story.
+* [x] The project does not read like a drone-simulation project.
+* [x] The project does not read like only a dashboard project.
+* [x] Claims are understandable to a Data Engineer or technical interviewer.
 
 ---
 
@@ -680,43 +709,61 @@ The dashboard makes both operational state and stream health observable.
 The repository contains sufficient public evidence to prove those claims.
 ```
 
-* [ ] Final technical acceptance completed.
+* [x] Final technical acceptance completed.
 
 ---
 
 # 24. QA Outcome
 
-After execution, record:
+Current status:
 
 ```text
 Repository QA status:
 [ ] NOT STARTED
 [ ] IN PROGRESS
-[ ] PASSED WITH OPEN ITEMS
+[x] PASSED WITH OPEN ITEMS
 [ ] PASSED
 ```
 
 Open items:
 
 ```text
-None recorded yet.
+1. Complete the remaining repository-wide navigation pass for contracts / public Markdown outside docs.
+2. Execute repository-wide secret-pattern searches.
+3. Run final Git hygiene and synchronization checks after all closeout edits.
+4. Validate README, Markdown navigation, evidence links, and images directly in GitHub.
+5. Complete Azure cost / cleanup / retention decision.
+6. Update the private portfolio roadmap after technical repository closeout.
+```
+
+Validated before this point:
+
+```text
+Technical implementation      PASS
+Event Hubs ingestion          PASS
+KQL analytical chain          PASS
+Canonicalization              PASS
+Integrity / timeliness        PASS
+State reconstruction          PASS
+Gold serving                  PASS
+Representative failures       PASS
+Dashboard                     PASS
+Dashboard public sanitization PASS
+Evidence set (33 images)      PASS
 ```
 
 Final QA date:
 
 ```text
-Pending.
+Pending final repository acceptance.
 ```
 
 ---
 
-### Continue
-
-**Previous:** [Evidence Index](evidence_index.md)
-**Documentation Hub:** [README](README.md)
-**Next:** [Project Closeout Checklist](project_closeout_checklist.md)
-
-**Related:**
-[Evidence Checklist](evidence_checklist.md)
-[Dashboard and Observability](dashboard_and_observability.md)
-[Streaming and KQL Architecture](streaming_and_kql_architecture.md)
+<p align="center">
+  <a href="portfolio_positioning.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="project_closeout_checklist.md">Next →</a>
+</p>

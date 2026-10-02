@@ -1,3 +1,13 @@
+<p align="center">
+  <a href="implementation_plan.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="streaming_and_kql_architecture.md">Next →</a>
+</p>
+
+---
+
 # Simulator and Event Model
 
 **Project:** `azure-real-time-analytics-pipeline`
@@ -1044,3 +1054,13 @@ observed, reproduced, and compared against downstream results.
 ```
 
 That capability allows the rest of the project to test stream reliability using known conditions rather than relying on assumptions about what happened before ingestion.
+
+---
+
+<p align="center">
+  <a href="implementation_plan.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="streaming_and_kql_architecture.md">Next →</a>
+</p>

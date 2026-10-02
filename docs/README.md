@@ -1,3 +1,13 @@
+<p align="center">
+  <a href="../README.md">Home</a> |
+  <a href="architecture_and_scope.md">Architecture</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="../dashboards/rtd-drone-operations.json">Dashboard</a> |
+  <a href="architecture_and_scope.md">Next →</a>
+</p>
+
+---
+
 # Documentation
 
 **Project:** `azure-real-time-analytics-pipeline`
@@ -163,6 +173,26 @@ This document explains:
 The simulator is supporting infrastructure.
 
 The Azure real-time analytical pipeline remains the primary project focus.
+
+---
+
+
+# Conceptual Visual Guides
+
+Conceptual visuals live under `../diagrams/` and explain the architecture without replacing execution evidence.
+
+| Visual | Purpose |
+|---|---|
+| [01 — End-to-End Streaming](../diagrams/01_end_to_end_streaming.png) | Complete source → Event Hubs → KQL → serving → dashboard story |
+| [02 — Stream Reliability](../diagrams/02_stream_reliability.png) | Physical delivery vs logical identity; integrity vs timeliness |
+| [03 — State Reconstruction](../diagrams/03_state_reconstruction.png) | Multi-source evidence, precedence, current state, latest observation, and Gold serving |
+| [04 — Failure to Observability](../diagrams/04_failure_to_observability.png) | Controlled failure → stream effect → KQL detection → operational interpretation |
+| [05 — Operational Command Center](../diagrams/05_operational_command_center.png) | Conceptual value of trusted real-time operational analytics |
+
+```text
+diagrams/ = conceptual communication
+evidence/ = implementation proof
+```
 
 ---
 
@@ -399,7 +429,7 @@ Focus on explaining the engineering decisions rather than memorizing implementat
                                       Closeout
 ```
 
-Conceptual architecture diagrams will later complement this navigation under the project's `diagrams/` directory.
+Conceptual architecture visuals complement this navigation under the project's `diagrams/` directory, while execution screenshots remain separated under `evidence/`.
 
 ---
 
@@ -418,3 +448,13 @@ This documentation hub controls navigation.
 Specialized technical documents provide depth.
 
 The implementation itself remains in the project's code, KQL, configuration, contract, dashboard, and test artifacts.
+
+---
+
+<p align="center">
+  <a href="../README.md">Home</a> |
+  <a href="architecture_and_scope.md">Architecture</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="../dashboards/rtd-drone-operations.json">Dashboard</a> |
+  <a href="architecture_and_scope.md">Next →</a>
+</p>

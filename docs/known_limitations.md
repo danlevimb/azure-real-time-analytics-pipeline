@@ -1,10 +1,15 @@
+<p align="center">
+  <a href="evidence_index.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="future_improvements.md">Next →</a>
+</p>
+
+---
+
 # Known Limitations
 
-> **Documentation path:**
-> [Documentation Hub](README.md) →
-> [Project Closeout Checklist](project_closeout_checklist.md) →
-> **Known Limitations** →
-> [Future Improvements](future_improvements.md)
 
 **Project:** `azure-real-time-analytics-pipeline`
 **Scope:** Portfolio-ready Azure Real-Time Data Engineering MVP
@@ -524,13 +529,10 @@ That is the intended scope of the project.
 
 ---
 
-### Continue
-
-**Previous:** [Project Closeout Checklist](project_closeout_checklist.md)
-**Documentation Hub:** [README](README.md)
-**Next:** [Future Improvements](future_improvements.md)
-
-**Related:**
-[Architecture and Scope](architecture_and_scope.md)
-[Streaming and KQL Architecture](streaming_and_kql_architecture.md)
-[Dashboard and Observability](dashboard_and_observability.md)
+<p align="center">
+  <a href="evidence_index.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="future_improvements.md">Next →</a>
+</p>

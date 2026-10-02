@@ -1,14 +1,19 @@
+<p align="center">
+  <a href="evidence_checklist.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="known_limitations.md">Next →</a>
+</p>
+
+---
+
 # Evidence Index
 
-> **Documentation path:**
-> [Documentation Hub](README.md) →
-> [Evidence Checklist](evidence_checklist.md) →
-> **Evidence Index** →
-> [Final Repository QA Checklist](final_repository_qa_checklist.md)
 
 **Project:** `azure-real-time-analytics-pipeline`
 **Purpose:** Map public technical claims to concrete evidence artifacts
-**Status:** Evidence capture pending / index prepared for closeout
+**Status:** Final evidence set committed and validated / repository QA in progress
 
 ---
 
@@ -93,15 +98,15 @@ FINAL
 
 Events are published through Azure Event Hubs and received by the analytical platform with Event Hubs transport metadata.
 
-| Evidence                                | Planned Artifact                                                 | Status    |
-| --------------------------------------- | ---------------------------------------------------------------- | --------- |
-| Successful cloud-enabled simulation run | `evidence/01_event_hubs_ingestion/01_cloud_run_success.png`      | `PENDING` |
-| Raw events from current simulator run   | `evidence/01_event_hubs_ingestion/02_raw_events_current_run.png` | `PENDING` |
-| Event Hubs metadata visible             | `evidence/01_event_hubs_ingestion/03_event_hubs_metadata.png`    | `PENDING` |
+| Evidence                                | Artifact                                                         | Status  |
+| --------------------------------------- | ---------------------------------------------------------------- | ------- |
+| Successful cloud-enabled simulation run | `evidence/01_event_hubs_ingestion/01_cloud_run_success.png`      | `FINAL` |
+| Raw events from current simulator run   | `evidence/01_event_hubs_ingestion/02_raw_events_current_run.png` | `FINAL` |
+| Event Hubs metadata visible             | `evidence/01_event_hubs_ingestion/03_event_hubs_metadata.png`    | `FINAL` |
 
 ### Primary technical proof
 
-The evidence should clearly show fields such as:
+The evidence shows fields such as:
 
 ```text
 simulator_run_id
@@ -126,17 +131,15 @@ eh_offset
 
 Raw streaming events are transformed into typed analytical tables and canonical logical events.
 
-| Evidence                 | Planned Artifact                                            | Status    |
-| ------------------------ | ----------------------------------------------------------- | --------- |
-| Raw event sample         | `evidence/02_kql_processing/01_raw_event_sample.png`        | `PENDING` |
-| Parsed telemetry         | `evidence/02_kql_processing/02_telemetry_parsed.png`        | `PENDING` |
-| Parsed state transitions | `evidence/02_kql_processing/03_state_transition_parsed.png` | `PENDING` |
-| Canonical telemetry      | `evidence/02_kql_processing/04_telemetry_canonical.png`     | `PENDING` |
-| Canonical deduplication  | `evidence/02_kql_processing/05_canonical_deduplication.png` | `PENDING` |
+| Evidence                 | Artifact                                                   | Status  |
+| ------------------------ | ---------------------------------------------------------- | ------- |
+| Raw event sample         | `evidence/02_kql_processing/01_raw_event_sample.png`       | `FINAL` |
+| Parsed telemetry         | `evidence/02_kql_processing/02_telemetry_parsed.png`       | `FINAL` |
+| Parsed state transitions | `evidence/02_kql_processing/03_state_transition_parsed.png`| `FINAL` |
+| Canonical telemetry      | `evidence/02_kql_processing/04_telemetry_canonical.png`    | `FINAL` |
+| Canonical deduplication  | `evidence/02_kql_processing/05_canonical_deduplication.png`| `FINAL` |
 
 ### Primary technical proof
-
-The evidence should demonstrate:
 
 ```text
 RawDroneEvents
@@ -146,7 +149,7 @@ Parsed event table
 Canonical event representation
 ```
 
-and specifically show that duplicate physical delivery does not produce duplicate logical canonical events.
+The final evidence also proves that duplicate physical delivery does not produce duplicate logical canonical events.
 
 ### Implementation
 
@@ -167,13 +170,16 @@ kql/04_materialized_views.kql
 
 ## Claim
 
-The platform detects logical stream-quality problems such as missing sequences, duplicate deliveries, sequence gaps, and ordering anomalies.
+The platform detects logical stream-quality problems such as missing sequences, duplicate deliveries, sequence gaps, and ordering anomalies while preserving canonical uniqueness.
 
-| Evidence                    | Planned Artifact                                                | Status    |
-| --------------------------- | --------------------------------------------------------------- | --------- |
-| Clean integrity baseline    | `evidence/03_stream_quality/01_clean_stream_integrity.png`      | `PENDING` |
-| Missing sequence detected   | `evidence/03_stream_quality/02_missing_sequence_detected.png`   | `PENDING` |
-| Duplicate delivery detected | `evidence/03_stream_quality/03_duplicate_delivery_detected.png` | `PENDING` |
+| Evidence                         | Artifact                                                              | Status  |
+| -------------------------------- | --------------------------------------------------------------------- | ------- |
+| Clean integrity baseline         | `evidence/03_stream_quality/01_clean_stream_integrity.png`            | `FINAL` |
+| Missing sequence detected        | `evidence/03_stream_quality/02_missing_sequence_detected.png`         | `FINAL` |
+| Missing-sequence gap detail      | `evidence/03_stream_quality/03_missing_sequence_gap_detail.png`       | `FINAL` |
+| Duplicate delivery detected      | `evidence/03_stream_quality/04_duplicate_delivery_detected.png`       | `FINAL` |
+| Canonical duplicate protection   | `evidence/03_stream_quality/05_duplicate_canonical_protection.png`    | `FINAL` |
+| Reconnect / out-of-order result  | `evidence/03_stream_quality/06_reconnect_integrity.png`               | `FINAL` |
 
 ### Primary analytical surface
 
@@ -203,10 +209,10 @@ NullEhMetadata
 
 The project measures how events arrive over time independently from whether the logical stream is complete.
 
-| Evidence                 | Planned Artifact                                       | Status    |
-| ------------------------ | ------------------------------------------------------ | --------- |
-| Timeliness metrics       | `evidence/03_stream_quality/04_timeliness_metrics.png` | `PENDING` |
-| Buffered/reconnect burst | `evidence/03_stream_quality/05_burst_detection.png`    | `PENDING` |
+| Evidence           | Artifact                                                   | Status  |
+| ------------------ | ---------------------------------------------------------- | ------- |
+| Timeliness metrics | `evidence/03_stream_quality/07_timeliness_metrics.png`     | `FINAL` |
+| Burst diagnostics  | `evidence/03_stream_quality/08_burst_detection.png`        | `FINAL` |
 
 ### Primary analytical surface
 
@@ -224,7 +230,7 @@ P95CloudLatencyMs
 MaxCloudLatencyMs
 ```
 
-Burst evidence may include:
+Burst evidence includes:
 
 ```text
 BurstDrone
@@ -239,8 +245,6 @@ BurstLastSeq
 Integrity ≠ Timeliness
 ```
 
-The evidence should make this distinction understandable without requiring inspection of simulator code.
-
 ### Related documentation
 
 [Stream Quality and Timeliness](stream_quality_and_timeliness.md)
@@ -253,14 +257,13 @@ The evidence should make this distinction understandable without requiring inspe
 
 Physical ingestion and logical analytical events can be reconciled without losing duplicate-delivery evidence.
 
-| Evidence                              | Planned Artifact                                                 | Status    |
-| ------------------------------------- | ---------------------------------------------------------------- | --------- |
-| Raw vs Canonical summary              | `evidence/03_stream_quality/06_raw_canonical_reconciliation.png` | `PENDING` |
-| Per-asset discrepancy view, if useful | `evidence/03_stream_quality/07_per_asset_reconciliation.png`     | `PENDING` |
+| Evidence                    | Artifact                                                               | Status  |
+| --------------------------- | ---------------------------------------------------------------------- | ------- |
+| Raw vs Canonical summary    | `evidence/03_stream_quality/09_raw_canonical_reconciliation.png`       | `FINAL` |
 
 ### Expected values
 
-Evidence should make relationships such as the following visible:
+The evidence makes these relationships visible:
 
 ```text
 RawRows
@@ -274,7 +277,7 @@ MissingFromCanonical
 ReconciliationStatus
 ```
 
-Healthy canonicalization should preserve:
+Healthy canonicalization preserves:
 
 ```text
 Raw unique logical events
@@ -296,41 +299,17 @@ when duplicate physical deliveries exist.
 
 ## Claim
 
-Current operational state is reconstructed from canonical evidence rather than being inferred only from the latest physically ingested telemetry row.
+Current operational state is reconstructed from canonical evidence and explicit precedence rules rather than being inferred only from the latest physically ingested telemetry row.
 
-| Evidence                     | Planned Artifact                                                    | Status    |
-| ---------------------------- | ------------------------------------------------------------------- | --------- |
-| Latest state evidence        | `evidence/04_state_and_serving/01_latest_state_evidence.png`        | `PENDING` |
-| Current reconstructed state  | `evidence/04_state_and_serving/02_fleet_current_state.png`          | `PENDING` |
-| Latest telemetry observation | `evidence/04_state_and_serving/03_latest_telemetry_observation.png` | `PENDING` |
+| Evidence                          | Artifact                                                                  | Status  |
+| --------------------------------- | ------------------------------------------------------------------------- | ------- |
+| State-evidence precedence         | `evidence/04_state_and_serving/01_state_evidence_precedence.png`          | `FINAL` |
+| Current state reconstruction      | `evidence/04_state_and_serving/02_current_state_reconstruction.png`       | `FINAL` |
+| Asset-state precedence resolution | `evidence/04_state_and_serving/03_asset_state_precedence_resolution.png`  | `FINAL` |
 
-### Strongest recommended proof
+### Strongest proof
 
-Capture one case where:
-
-```text
-Latest telemetry observation
-        ≠
-Latest operational state
-```
-
-For example:
-
-```text
-Last known observation
-+
-newer DISCONNECTED state
-```
-
-or:
-
-```text
-Last known observation
-+
-terminal state
-```
-
-This demonstrates why state reconstruction exists.
+The evidence demonstrates that state reconstruction can resolve multiple evidence families using precedence rather than trusting only the latest telemetry observation.
 
 ### Related documentation
 
@@ -344,11 +323,11 @@ This demonstrates why state reconstruction exists.
 
 Reusable KQL functions expose standardized analytical interfaces for downstream consumers.
 
-| Evidence                  | Planned Artifact                                              | Status    |
-| ------------------------- | ------------------------------------------------------------- | --------- |
-| Fleet operational view    | `evidence/04_state_and_serving/04_fleet_operational_view.png` | `PENDING` |
-| Fleet operational summary | `evidence/04_state_and_serving/05_operational_summary.png`    | `PENDING` |
-| Current map-serving view  | `evidence/04_state_and_serving/06_current_map_view.png`       | `PENDING` |
+| Evidence                    | Artifact                                                             | Status  |
+| --------------------------- | -------------------------------------------------------------------- | ------- |
+| Operational serving view    | `evidence/04_state_and_serving/04_operational_serving_view.png`      | `FINAL` |
+| Fleet operational summary   | `evidence/04_state_and_serving/05_fleet_operational_summary.png`     | `FINAL` |
+| Geospatial serving dataset  | `evidence/04_state_and_serving/06_geospatial_serving_dataset.png`    | `FINAL` |
 
 ### Primary serving surfaces
 
@@ -358,7 +337,7 @@ CurrentFleetOperationalSummary()
 CurrentFleetMapView()
 ```
 
-Evidence should show that dashboard-facing results are already analytically prepared before visualization.
+The evidence shows that dashboard-facing results are analytically prepared before visualization.
 
 ---
 
@@ -368,29 +347,25 @@ Evidence should show that dashboard-facing results are already analytically prep
 
 Known upstream failure conditions produce observable and explainable downstream effects.
 
-| Evidence                  | Planned Artifact                                            | Status    |
-| ------------------------- | ----------------------------------------------------------- | --------- |
-| Duplicate-delivery effect | `evidence/05_failure_scenarios/01_duplicate_scenario.png`   | `PENDING` |
-| Missing/drop effect       | `evidence/05_failure_scenarios/02_drop_scenario.png`        | `PENDING` |
-| Buffered reconnect burst  | `evidence/05_failure_scenarios/03_reconnect_burst.png`      | `PENDING` |
-| RF degradation effect     | `evidence/05_failure_scenarios/04_rf_failure_effect.png`    | `PENDING` |
-| FIBER degradation effect  | `evidence/05_failure_scenarios/05_fiber_failure_effect.png` | `PENDING` |
-| Terminal-state behavior   | `evidence/05_failure_scenarios/06_terminal_state.png`       | `PENDING` |
+The final failure evidence focuses on communication-path failure and terminal asset behavior. Duplicate, missing, reconnect, and out-of-order effects are already proven in Stream Quality evidence.
+
+| Evidence                                  | Artifact                                                                         | Status  |
+| ----------------------------------------- | -------------------------------------------------------------------------------- | ------- |
+| FIBER link-loss state transitions         | `evidence/05_failure_scenarios/01_fiber_link_loss_state_transitions.png`         | `FINAL` |
+| FIBER link-loss telemetry window          | `evidence/05_failure_scenarios/02_fiber_link_loss_telemetry_window.png`          | `FINAL` |
+| Terminal destruction transitions          | `evidence/05_failure_scenarios/03_terminal_destruction_state_transitions.png`    | `FINAL` |
+| Terminal state reconstruction             | `evidence/05_failure_scenarios/04_terminal_destruction_reconstructed_state.png`  | `FINAL` |
+| Terminal fleet impact                     | `evidence/05_failure_scenarios/05_terminal_destruction_fleet_impact.png`         | `FINAL` |
+| Failure isolation in mixed fleet          | `evidence/05_failure_scenarios/06_failure_isolation_mixed_fleet.png`             | `FINAL` |
 
 ### Evidence principle
-
-Do not focus primarily on:
-
-```text
-the YAML configuration
-```
-
-Focus on:
 
 ```text
 Injected condition
       ↓
 Observable Azure/KQL effect
+      ↓
+Operational interpretation
 ```
 
 ### Related documentation
@@ -403,24 +378,23 @@ Observable Azure/KQL effect
 
 ## Claim
 
-The dashboard exposes current operational information using Gold serving functions.
+The Operations page exposes current fleet state through Gold serving functions.
 
-| Evidence                      | Planned Artifact                                         | Status    |
-| ----------------------------- | -------------------------------------------------------- | --------- |
-| Operations overview           | `evidence/06_dashboard/01_operations_overview.png`       | `PENDING` |
-| Communications / connectivity | `evidence/06_dashboard/02_operations_communications.png` | `PENDING` |
+| Evidence            | Artifact                                                   | Status  |
+| ------------------- | ---------------------------------------------------------- | ------- |
+| Operations dashboard| `evidence/06_dashboard/01_operations_dashboard.png`        | `FINAL` |
 
-Evidence should include useful context such as:
+The evidence shows:
 
 ```text
 Availability
 Connectivity
 Mission Completion
 Platform Health
-
-Map
-Communication mode
-Telemetry freshness
+Fleet map
+Communication mode mix
+Asset losses
+Operational detail
 ```
 
 ### Related documentation
@@ -435,44 +409,47 @@ Telemetry freshness
 
 Pipeline-health information is exposed operationally alongside domain information.
 
-| Evidence                | Planned Artifact                                       | Status    |
-| ----------------------- | ------------------------------------------------------ | --------- |
-| Stream Quality overview | `evidence/06_dashboard/03_stream_quality_overview.png` | `PENDING` |
-| Reconciliation view     | `evidence/06_dashboard/04_stream_reconciliation.png`   | `PENDING` |
+| Evidence                 | Artifact                                                      | Status  |
+| ------------------------ | ------------------------------------------------------------- | ------- |
+| Stream Quality dashboard | `evidence/06_dashboard/02_stream_quality_dashboard.png`       | `FINAL` |
 
-The strongest screenshot should show several reliability dimensions together.
-
-Examples:
+The final page combines:
 
 ```text
 Integrity
 Timeliness
-Latest Run
-Reconciliation
+Event volume
+Burst diagnostics
+Window throughput
+Raw → Canonical reconciliation
+Window timeliness
 ```
 
-This is one of the most important portfolio evidence artifacts.
+This is one of the strongest portfolio evidence artifacts.
 
 ---
 
-# 14. Asset Detail
+# 14. Drone Detail
 
 ## Claim
 
 The dashboard supports parameterized investigation of an individual producer while preserving logical event sequencing.
 
-| Evidence                   | Planned Artifact                                      | Status    |
-| -------------------------- | ----------------------------------------------------- | --------- |
-| Parameterized asset detail | `evidence/06_dashboard/05_asset_detail.png`           | `PENDING` |
-| Unified event timeline     | `evidence/06_dashboard/06_unified_event_timeline.png` | `PENDING` |
+| Evidence              | Artifact                                                | Status  |
+| --------------------- | ------------------------------------------------------- | ------- |
+| Drone Detail dashboard| `evidence/06_dashboard/03_asset_detail_dashboard.png`   | `FINAL` |
 
-Evidence should show:
+The evidence shows:
 
 ```text
 _droneId selection
         ↓
-Telemetry history
-        +
+Current fleet position
++
+Trajectory
++
+Flight profile
++
 State transitions
         ↓
 Unified sequence-oriented timeline
@@ -480,28 +457,57 @@ Unified sequence-oriented timeline
 
 ---
 
-# 15. Repository Closeout Evidence
+# 15. Communications Dashboard
+
+## Claim
+
+The dashboard exposes communication-path health as an analytical surface rather than only as simulator behavior.
+
+| Evidence                 | Artifact                                                     | Status  |
+| ------------------------ | ------------------------------------------------------------ | ------- |
+| Communications dashboard | `evidence/06_dashboard/04_communications_dashboard.png`      | `FINAL` |
+
+The evidence shows:
+
+```text
+Unaffected / affected links
+Disconnected links
+Out-of-order communication events
+Communication condition
+RF / FIBER mode distribution
+Affected links
+Link-state events
+```
+
+### Related documentation
+
+[Dashboard and Observability](dashboard_and_observability.md)
+
+---
+
+# 16. Repository Closeout Evidence
 
 ## Claim
 
 The public repository accurately represents the completed MVP and contains no unnecessary runtime artifacts or sensitive information.
 
-| Evidence                    | Artifact                               | Status    |
-| --------------------------- | -------------------------------------- | --------- |
-| Final repository tree       | Repository itself                      | `PENDING` |
-| KQL scripts 01–10           | `kql/`                                 | `PENDING` |
-| Event contracts             | `contracts/`                           | `PENDING` |
-| Documentation hub           | `docs/README.md`                       | `PENDING` |
-| Dashboard export            | `dashboards/rtd-drone-operations.json` | `PENDING` |
-| Evidence structure          | `evidence/`                            | `PENDING` |
-| Git clean state             | Local Git validation                   | `PENDING` |
-| Secret/public-safety review | Final repository QA                    | `PENDING` |
+Repository closeout is validated directly from repository artifacts; no `07_final_review/` screenshot folder is required.
 
-The final repository should prove most of these items directly without screenshots.
+| Evidence                    | Artifact                               | Status      |
+| --------------------------- | -------------------------------------- | ----------- |
+| KQL scripts 01–10           | `kql/`                                 | `COMMITTED` |
+| Event contracts             | `contracts/`                           | `COMMITTED` |
+| Documentation hub           | `docs/README.md`                       | `COMMITTED` |
+| Sanitized dashboard export  | `dashboards/rtd-drone-operations.json` | `COMMITTED` |
+| Final evidence structure    | `evidence/`                            | `FINAL`     |
+| Git clean state             | Local Git validation                   | `PENDING`   |
+| Full secret/public-safety QA| Final repository QA                    | `PENDING`   |
+
+The remaining `PENDING` items belong to the final repository QA phase, not to evidence capture.
 
 ---
 
-# 16. Minimum Final Evidence Story
+# 17. Minimum Final Evidence Story
 
 If a reviewer examines only a small subset of evidence, prioritize:
 
@@ -525,6 +531,10 @@ If a reviewer examines only a small subset of evidence, prioritize:
 09 Operations Dashboard
         ↓
 10 Stream Quality Dashboard
+        ↓
+11 Drone Detail
+        ↓
+12 Communications Dashboard
 ```
 
 Together these prove the main professional capability:
@@ -537,7 +547,7 @@ reconstruct, serve, and observe imperfect event streams.
 
 ---
 
-# 17. Evidence Capture Workflow
+# 18. Evidence Capture Workflow
 
 Evidence should be captured deliberately rather than opportunistically.
 
@@ -562,34 +572,30 @@ It should first demonstrate the intended claim clearly.
 
 ---
 
-# 18. Capture Order
+# 19. Capture Order
 
-Recommended evidence-capture order:
+Final evidence capture was completed in this order:
 
 ```text
 01 Event Hubs ingestion
 02 KQL processing
-03 Clean quality baseline
-04 Duplicate scenario
-05 Missing-event scenario
-06 Timeliness / reconnect burst
-07 Raw-to-Canonical reconciliation
-08 State reconstruction
-09 Gold serving
-10 Terminal-state example
-11 Operations dashboard
-12 Stream Quality dashboard
-13 Asset-detail page
-14 Final repository QA
+03 Stream Quality
+04 State reconstruction and Gold serving
+05 Representative failure scenarios
+06 Operations dashboard
+07 Stream Quality dashboard
+08 Drone Detail dashboard
+09 Communications dashboard
+10 Final repository QA
 ```
 
-This sequence minimizes unnecessary scenario reruns and keeps related screenshots together.
+This sequence kept related evidence together and minimized unnecessary scenario reruns.
 
 ---
 
-# 19. Final Evidence Review
+# 20. Final Evidence Review
 
-Before closeout verify that:
+The committed evidence set contains **33 public-safe screenshots**. Before repository closeout, verify that:
 
 * Every screenshot supports a specific claim
 * No screenshot exists only for decoration
@@ -604,13 +610,10 @@ Before closeout verify that:
 
 ---
 
-### Continue
-
-**Previous:** [Evidence Checklist](evidence_checklist.md)
-**Documentation Hub:** [README](README.md)
-**Next:** [Final Repository QA Checklist](final_repository_qa_checklist.md)
-
-**Related:**
-[Dashboard and Observability](dashboard_and_observability.md)
-[Stream Quality and Timeliness](stream_quality_and_timeliness.md)
-[State Reconstruction and Serving](state_reconstruction_and_serving.md)
+<p align="center">
+  <a href="evidence_checklist.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="known_limitations.md">Next →</a>
+</p>

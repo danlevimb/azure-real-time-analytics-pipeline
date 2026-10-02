@@ -1,6 +1,18 @@
+<p align="center">
+  <a href="event_contract_v1_0.md">← v1.0</a> |
+  <a href="../README.md">Home</a> |
+  <a href="../docs/README.md">Documentation</a> |
+  <a href="README.md">Contracts</a> |
+  <a href="event_contract_v1_2.md">v1.2 →</a>
+</p>
+
+---
+
 # Event Contract v1.1
 
-Status: **current additive contract**
+Status: **historical additive contract / superseded by v1.2**
+
+> **Historical contract note:** v1.1 introduced the optical-fiber consumable while keeping producer-side connectivity outside the schema. It remains available for compatibility history. The current project contract is [v1.2](event_contract_v1_2.md).
 
 Event Contract v1.1 preserves the complete v1.0 envelope and event-family semantics and adds one telemetry resource measurement.
 
@@ -33,3 +45,13 @@ For `event_type == "telemetry"`, v1.1 adds:
 ## Communications boundary
 
 Producer-side connectivity is deliberately outside the schema. A v1.1 event may be generated and logged locally but blocked by the communications gate before entering `TransportEngine`. No transmission-state field is added to the event payload.
+
+---
+
+<p align="center">
+  <a href="event_contract_v1_0.md">← v1.0</a> |
+  <a href="../README.md">Home</a> |
+  <a href="../docs/README.md">Documentation</a> |
+  <a href="README.md">Contracts</a> |
+  <a href="event_contract_v1_2.md">v1.2 →</a>
+</p>

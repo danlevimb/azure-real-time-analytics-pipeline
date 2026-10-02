@@ -1,10 +1,15 @@
+<p align="center">
+  <a href="known_limitations.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="portfolio_positioning.md">Next →</a>
+</p>
+
+---
+
 # Future Improvements
 
-> **Documentation path:**
-> [Documentation Hub](README.md) →
-> [Known Limitations](known_limitations.md) →
-> **Future Improvements** →
-> [Portfolio Positioning](portfolio_positioning.md)
 
 **Project:** `azure-real-time-analytics-pipeline`
 **Scope:** Logical evolution beyond the current portfolio-ready MVP
@@ -879,13 +884,10 @@ Future work should extend that foundation rather than delay formal closeout.
 
 ---
 
-### Continue
-
-**Previous:** [Known Limitations](known_limitations.md)
-**Documentation Hub:** [README](README.md)
-**Next:** [Portfolio Positioning](portfolio_positioning.md)
-
-**Related:**
-[Architecture and Scope](architecture_and_scope.md)
-[Project Closeout Checklist](project_closeout_checklist.md)
-[Final Repository QA Checklist](final_repository_qa_checklist.md)
+<p align="center">
+  <a href="known_limitations.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="portfolio_positioning.md">Next →</a>
+</p>

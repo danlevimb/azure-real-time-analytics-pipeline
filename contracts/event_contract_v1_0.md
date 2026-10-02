@@ -1,6 +1,18 @@
+<p align="center">
+  <a href="README.md">← Contracts</a> |
+  <a href="../README.md">Home</a> |
+  <a href="../docs/README.md">Documentation</a> |
+  <a href="README.md">Contracts</a> |
+  <a href="event_contract_v1_1.md">v1.1 →</a>
+</p>
+
+---
+
 # Event Contract v1.0
 
-Status: **baseline / backward-compatible legacy**
+Status: **historical baseline / backward-compatible legacy**
+
+> **Historical contract note:** v1.0 is preserved to document the original event envelope and compatibility baseline. The current project contract is [v1.2](event_contract_v1_2.md).
 
 This document formalizes the contract that already existed in `EventFactory` before the v1.1 extension.
 
@@ -75,3 +87,13 @@ Every logical event contains:
 ## Boundary
 
 The contract describes the logical event after generation. It does not guarantee that the event is transmitted, submitted to `TransportEngine`, physically delivered, or ingested by Azure.
+
+---
+
+<p align="center">
+  <a href="README.md">← Contracts</a> |
+  <a href="../README.md">Home</a> |
+  <a href="../docs/README.md">Documentation</a> |
+  <a href="README.md">Contracts</a> |
+  <a href="event_contract_v1_1.md">v1.1 →</a>
+</p>

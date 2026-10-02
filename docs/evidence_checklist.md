@@ -1,14 +1,19 @@
+<p align="center">
+  <a href="dashboard_and_observability.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="evidence_index.md">Next →</a>
+</p>
+
+---
+
 # Evidence Checklist
 
-> **Documentation path:**
-> [Documentation Hub](README.md) →
-> [Dashboard & Observability](dashboard_and_observability.md) →
-> **Evidence Checklist** →
-> [Evidence Index](evidence_index.md)
 
 **Project:** `azure-real-time-analytics-pipeline`
 **Focus:** Public evidence supporting the main Azure Real-Time Data Engineering claims
-**Status:** Closeout evidence planning and validation
+**Status:** Completed / validated / public-safe
 
 ---
 
@@ -73,29 +78,22 @@ Evidence should not expose:
 
 ## 3. Evidence Folder Structure
 
-Recommended structure:
+Final public evidence structure:
 
 ```text
 evidence/
 │
-├── README.md
-│
 ├── 01_event_hubs_ingestion/
-│
 ├── 02_kql_processing/
-│
 ├── 03_stream_quality/
-│
 ├── 04_state_and_serving/
-│
 ├── 05_failure_scenarios/
-│
-├── 06_dashboard/
-│
-└── 07_final_review/
+└── 06_dashboard/
 ```
 
-Each folder should contain only evidence that supports its specific capability area.
+The final evidence set contains **33 public-safe screenshots**. Each folder contains only evidence that supports its specific capability area.
+
+Repository closeout is validated through repository artifacts and the final QA checklist; it does not require a separate `07_final_review/` screenshot folder.
 
 ---
 
@@ -207,16 +205,19 @@ At least one clean baseline and representative degraded scenarios demonstrating:
 * Timeliness degradation
 * Raw vs canonical reconciliation
 
-### Recommended screenshots
+### Final screenshots
 
 ```text
 03_stream_quality/
 ├── 01_clean_stream_integrity.png
 ├── 02_missing_sequence_detected.png
-├── 03_duplicate_delivery_detected.png
-├── 04_timeliness_metrics.png
-├── 05_burst_detection.png
-└── 06_raw_canonical_reconciliation.png
+├── 03_missing_sequence_gap_detail.png
+├── 04_duplicate_delivery_detected.png
+├── 05_duplicate_canonical_protection.png
+├── 06_reconnect_integrity.png
+├── 07_timeliness_metrics.png
+├── 08_burst_detection.png
+└── 09_raw_canonical_reconciliation.png
 ```
 
 ### Preferred KQL surfaces
@@ -257,16 +258,16 @@ The project reconstructs current operational state from canonical event evidence
 * Operational summary
 * Map-serving result
 
-### Recommended screenshots
+### Final screenshots
 
 ```text
 04_state_and_serving/
-├── 01_latest_state_evidence.png
-├── 02_fleet_current_state.png
-├── 03_latest_telemetry_observation.png
-├── 04_fleet_operational_view.png
-├── 05_operational_summary.png
-└── 06_current_map_view.png
+├── 01_state_evidence_precedence.png
+├── 02_current_state_reconstruction.png
+├── 03_asset_state_precedence_resolution.png
+├── 04_operational_serving_view.png
+├── 05_fleet_operational_summary.png
+└── 06_geospatial_serving_dataset.png
 ```
 
 ### Important evidence case
@@ -314,16 +315,18 @@ Terminal asset
 
 It is not necessary to publish evidence for every YAML configuration.
 
-### Recommended screenshots
+### Final screenshots
+
+The final failure evidence focuses on representative communication and terminal-state behavior; duplicate, drop, and reconnect reliability effects are already proven in Category 03.
 
 ```text
 05_failure_scenarios/
-├── 01_duplicate_scenario.png
-├── 02_drop_scenario.png
-├── 03_reconnect_burst.png
-├── 04_rf_failure_effect.png
-├── 05_fiber_failure_effect.png
-└── 06_terminal_state.png
+├── 01_fiber_link_loss_state_transitions.png
+├── 02_fiber_link_loss_telemetry_window.png
+├── 03_terminal_destruction_state_transitions.png
+├── 04_terminal_destruction_reconstructed_state.png
+├── 05_terminal_destruction_fleet_impact.png
+└── 06_failure_isolation_mixed_fleet.png
 ```
 
 ### Evidence should demonstrate
@@ -346,12 +349,13 @@ Operational interpretation
 
 The real-time dashboard consumes reusable KQL analytical layers and exposes both operational state and data-pipeline health.
 
-The current dashboard implementation includes the principal areas:
+The final dashboard implementation includes four principal pages:
 
 ```text
 Operations
+Communications
 Stream Quality
-Asset Detail
+Drone Detail
 ```
 
 ### Required evidence
@@ -365,7 +369,18 @@ Capture:
 * Connectivity
 * Mission completion
 * Platform health
-* Communications information
+* Communications mix
+* Operational detail
+
+#### Communications
+
+Capture:
+
+* Communication quality summary
+* Healthy / affected link condition
+* RF / FIBER mode distribution
+* Affected links
+* Link-state events
 
 #### Stream Quality
 
@@ -373,30 +388,33 @@ Capture:
 
 * Integrity metrics
 * Timeliness metrics
-* Latest observed run
-* Reconciliation
-* Event volume or throughput
+* Current run context
+* Raw-to-Canonical reconciliation
+* Event volume / throughput
+* Window throughput and timeliness
 
-#### Asset Detail
+#### Drone Detail
 
 Capture:
 
-* Parameterized asset selector
-* Telemetry history
+* Parameterized drone selector
+* Current fleet position
+* Per-drone trajectory
+* Flight profile
 * State transitions
 * Unified event timeline
 
-### Recommended screenshots
+### Final screenshots
 
 ```text
 06_dashboard/
-├── 01_operations_overview.png
-├── 02_operations_communications.png
-├── 03_stream_quality_overview.png
-├── 04_stream_reconciliation.png
-├── 05_asset_detail.png
-└── 06_unified_event_timeline.png
+├── 01_operations_dashboard.png
+├── 02_stream_quality_dashboard.png
+├── 03_asset_detail_dashboard.png
+└── 04_communications_dashboard.png
 ```
+
+The `RunId` control is intentionally visible as analyst context across pages. Dashboard queries continue to resolve the active dataset through `LatestObservedRun()` and the `Current*` serving functions rather than using the displayed RunId as a query filter.
 
 ---
 
@@ -420,15 +438,18 @@ The public repository accurately represents the completed portfolio MVP.
 * Git working tree clean
 * Local repository synchronized with remote
 
-### Recommended artifacts
+### Validation approach
+
+No additional screenshot folder is required for this phase.
+
+Final review is performed against repository artifacts and the dedicated QA checklist:
 
 ```text
-07_final_review/
-├── README.md
-└── optional_public_repo_overview.png
+final_repository_qa_checklist.md
+project_closeout_checklist.md
 ```
 
-This section may rely partly on repository files rather than screenshots where screenshots add little value.
+The review should verify repository structure, public safety, committed evidence, documentation consistency, dashboard export sanitization, Git cleanliness, and remote synchronization.
 
 ---
 
@@ -602,7 +623,7 @@ The final evidence set should support at least the following project claims:
 | RF/FIBER context reaches analytical consumers                | Categories 04–06    |
 | Operational state and stream health are visible together     | Category 06         |
 | Dashboard configuration is versioned                         | Repository artifact |
-| Repository is portfolio-safe and reproducible                | Category 07         |
+| Repository is portfolio-safe and reproducible                | Final Repository QA |
 
 ---
 
@@ -640,15 +661,27 @@ The evidence phase is complete when:
 * Azure Data Engineering remains the visible project focus
 * The evidence supports the final README narrative
 
+### Final evidence result
+
+```text
+Category 01 — Event Hubs Ingestion:       3 screenshots
+Category 02 — KQL Processing:             5 screenshots
+Category 03 — Stream Quality:             9 screenshots
+Category 04 — State and Serving:          6 screenshots
+Category 05 — Failure Scenarios:          6 screenshots
+Category 06 — Dashboard / Observability:  4 screenshots
+                                          --------------
+Total:                                   33 screenshots
+```
+
+**Evidence phase status:** `COMPLETE / PUBLIC-SAFE / COMMITTED`
+
 ---
 
-### Continue
-
-**Previous:** [Dashboard and Observability](dashboard_and_observability.md)
-**Documentation Hub:** [README](README.md)
-**Next:** [Evidence Index](evidence_index.md)
-
-**Related:**
-[Streaming and KQL Architecture](streaming_and_kql_architecture.md)
-[Stream Quality and Timeliness](stream_quality_and_timeliness.md)
-[State Reconstruction and Serving](state_reconstruction_and_serving.md)
+<p align="center">
+  <a href="dashboard_and_observability.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="evidence_index.md">Next →</a>
+</p>

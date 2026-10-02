@@ -1,3 +1,13 @@
+<p align="center">
+  <a href="simulator_and_event_model.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="stream_quality_and_timeliness.md">Next →</a>
+</p>
+
+---
+
 # Streaming and KQL Architecture
 
 **Project:** `azure-real-time-analytics-pipeline`
@@ -1574,3 +1584,13 @@ Events can be traced from physical arrival to canonical identity,
 evaluated for stream integrity and timeliness, reconstructed into
 operational state, and exposed through reusable analytical interfaces.
 ```
+
+---
+
+<p align="center">
+  <a href="simulator_and_event_model.md">← Back</a> |
+  <a href="../README.md">Home</a> |
+  <a href="README.md">Documentation</a> |
+  <a href="evidence_index.md">Evidence</a> |
+  <a href="stream_quality_and_timeliness.md">Next →</a>
+</p>
