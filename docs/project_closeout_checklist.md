@@ -13,7 +13,7 @@
 
 **Project:** `azure-real-time-analytics-pipeline`
 **Purpose:** Master checklist for technical, evidence, documentation, Git, Azure, and portfolio closeout
-**Status:** Closeout in progress — technical/evidence validation, public GitHub QA, and Azure cleanup complete; final local synchronization, Git-history safety review, and roadmap update remain
+**Status:** Completed / portfolio-ready MVP closed
 
 ---
 
@@ -850,13 +850,13 @@ Completed / portfolio-ready MVP closed
 
 Update relevant roadmap areas:
 
-* [ ] Master snapshot
-* [ ] Project sequence
-* [ ] Azure training roadmap
-* [ ] Capability matrix
-* [ ] Portfolio narrative
-* [ ] Current next action
-* [ ] Next-project recommendation
+* [x] Master snapshot
+* [x] Project sequence
+* [x] Azure training roadmap
+* [x] Capability matrix
+* [x] Portfolio narrative
+* [x] Current next action
+* [x] Next-project recommendation
 
 Real-time analytics should then move from a capability gap to a demonstrated capability.
 
@@ -866,9 +866,9 @@ Real-time analytics should then move from a capability gap to a demonstrated cap
 
 CV and LinkedIn work are **not required to close the technical project**.
 
-* [ ] Technical repository closed first.
-* [ ] Roadmap updated.
-* [ ] Portfolio statement finalized.
+* [x] Technical repository closed first.
+* [x] Roadmap updated.
+* [x] Portfolio statement finalized.
 * [x] CV update deferred to dedicated workstream.
 * [x] LinkedIn update deferred to dedicated workstream.
 * [x] GitHub profile branding deferred unless explicitly included in closeout.
@@ -882,9 +882,9 @@ Branding comes afterward.
 
 ---
 
-# 27. Interview Defense Readiness
+# 27. Post-Closeout Interview Defense Readiness
 
-Before considering the project fully portfolio-ready, be able to explain:
+The repository is portfolio-ready. The following remains as a dedicated post-closeout interview-defense checklist:
 
 * [ ] Why Event Hubs was used.
 * [ ] Why Raw data is preserved.
@@ -933,11 +933,11 @@ only when the following are true:
 * [x] Documentation navigation is complete.
 * [x] Known limitations are documented.
 * [x] Future improvements are documented.
-* [ ] Final Repository QA has passed.
+* [x] Final Repository QA has passed.
 * [x] GitHub public QA has passed.
-* [ ] Public-safety review has passed.
+* [x] Public-safety review has passed.
 * [x] Cost/cleanup decision is complete.
-* [ ] Private roadmap has been updated.
+* [x] Private roadmap has been updated.
 
 ---
 
@@ -962,19 +962,19 @@ Dashboard artifact:
 COMPLETE — four-page export sanitized for public repository use
 
 Repository QA:
-PASSED WITH OPEN ITEMS — public GitHub QA, navigation, current-tree safety scan, and Azure cleanup are complete; Git-history safety review and final local synchronization remain
+PASSED — technical, documentation, public GitHub, current-tree safety, Git-history pattern scan, evidence, and Azure cleanup validation complete
 
 Technical closeout date:
-Pending formal acceptance
+2026-10-02
 
 Azure cleanup / retention decision:
 COMPLETE — project Event Hubs namespace, empty analytics workspace, and project resource group removed; no live project resources intentionally retained. Final cost refresh pending billing propagation.
 
 Private roadmap updated:
-Pending
+COMPLETE — master snapshot, project sequence, training roadmap, decision log, certification alignment, operating model, continuity openers, and project closeout note updated.
 ```
 
-Formal project closeout should be recorded only after the remaining repository, GitHub, cost/cleanup, and roadmap items are complete.
+Formal project closeout is complete. Azure billing refresh and local-clone fast-forward are post-closeout housekeeping and do not block the portfolio status.
 
 ---
 
