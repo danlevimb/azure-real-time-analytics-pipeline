@@ -1,0 +1,149 @@
+config_version: "1.2"
+
+simulation:
+  run_name: "fleet005_v12_evidence_duplicate_cloud_001"
+  seed: 20260930
+  start_time_utc: auto
+  duration_seconds: 100
+  tick_ms: 250
+  speed_multiplier: 1.0
+
+telemetry:
+  interval_ms: 1000
+  schema_version: "1.2"
+
+simulation_context:
+  simulator_run_id: "RUN-FLEET05-V12-EVIDENCE-DUPLICATE-CLOUD-001"
+  scenario: "evidence_duplicate"
+
+# =========================================================
+# Drone template
+# =========================================================
+drone:
+  drone_id: "DRN-001"
+  battalion_id: "BTN-01"
+  initial_position:
+    latitude: 72.000000
+    longitude: -40.000000
+    altitude_m: 0.0
+  movement:
+    cruise_speed_mps: 20.0
+    heading_deg: 0.0
+  operational_profile:
+    initial_battery_pct: 100.0
+    battery_drain_pct_per_minute: 6.0
+  communications:
+    mode: "RF"
+# =========================================================
+# Fleet
+# =========================================================
+fleet:
+
+  fleet_id: "FLEET-01"
+  battalion_id: "BTN-01"
+
+  members:
+
+    - drone_id: "DRN-001"
+      mission_id: "MSN-001"
+      latitude_offset: 0.0000
+      longitude_offset: 0.0000
+
+    - drone_id: "DRN-002"
+      mission_id: "MSN-002"
+      latitude_offset: 0.0004
+      longitude_offset: 0.0025
+      communications:
+        mode: "FIBER"
+        initial_optic_fiber_m: 10000.0
+
+    - drone_id: "DRN-003"
+      mission_id: "MSN-003"
+      latitude_offset: -0.0004
+      longitude_offset: -0.0025
+
+    - drone_id: "DRN-004"
+      mission_id: "MSN-004"
+      latitude_offset: 0.0008
+      longitude_offset: -0.0015
+      communications:
+        mode: "FIBER"
+        initial_optic_fiber_m: 8000.0
+
+    - drone_id: "DRN-005"
+      mission_id: "MSN-005"
+      latitude_offset: -0.0008
+      longitude_offset: 0.0015
+
+# =========================================================
+# Mission template
+# =========================================================
+mission:
+  mission_id: "MSN-001"
+  mission_type: "training"
+  target_altitude_m: 120.0
+  climb_rate_mps: 30.0
+  descent_rate_mps: 30.0
+  orbit:
+    radius_m: 60.0
+    duration_seconds: 20.0
+    direction: "CLOCKWISE"
+
+# =========================================================
+# Route geometry template
+# =========================================================
+route:
+  route_instance_id: "ROUTE-DRN001-001"
+  waypoints:
+    - waypoint_id: "WP-01"
+      latitude: 72.000953849
+      longitude: -39.996913043
+    - waypoint_id: "WP-02"
+      latitude: 72.000672683
+      longitude: -39.991753969
+    - waypoint_id: "WP-03"
+      latitude: 71.998982503
+      longitude: -39.993744597
+
+# =========================================================
+# Observability
+# =========================================================
+observability:
+  console_interval_ms: 1000
+  ground_truth:
+    enabled: true
+
+# =========================================================
+# Transport
+# =========================================================
+transport:
+  enabled: true
+  base_delay_ms: 750
+  buffering:
+    enabled: false
+    start_at_seconds: 35.0
+    end_at_seconds: 45.0
+  fault_injection:
+    duplicate_sequences: []
+    drop_sequences: []
+    extra_delay: []
+    duplicate_targets:
+      - drone_id: "DRN-003"
+        source_sequence_number: 20
+    drop_targets: []
+    extra_delay_targets: []
+
+# =========================================================
+# Publishers
+# =========================================================
+publishers:
+  file:
+    enabled: true
+
+  event_hubs:
+    enabled: true
+    fully_qualified_namespace: ehns-drone-rti-dev-eus-01.servicebus.windows.net
+    event_hub_name: eh-drone-events-v1
+    partition_key_field: drone_id
+    buffered_mode: true
+    max_wait_time_seconds: 0.5

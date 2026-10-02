@@ -1,18 +1,18 @@
-.create-or-alter function 
-with (
+.create-or-alter function with 
+    (
     folder = "Silver/Performance", 
     docstring = "Summarizes scale and performance metrics for a specified simulator run", 
     skipvalidation = "true") 
 ScaleValidationReport(p_RunId:string) {
-    let RawRun = RawDroneEvents | where tostring(simulation.simulator_run_id) == p_RunId;
-    let PhysicalRows = toscalar(RawRun | count);
-    let UniqueEventIds = toscalar (RawRun | summarize by event_id | count);
-    let DroneSeen = toscalar (RawRun | summarize by drone_id | count);
-    let TimeStats = RawRun | summarize FirstEhTime = min(eh_enqueued_time), LastEhTime = max(eh_enqueued_time);
-    let FirstEhTime = toscalar (TimeStats | project FirstEhTime);
-    let LastEhTime = toscalar (TimeStats  | project LastEhTime);
-    let ObservedDurationSec = todouble(datetime_diff("millisecond", LastEhTime, FirstEhTime)) / 1000.0;
-    let AvgIngressEventsPerSec = iif(ObservedDurationSec  > 0, round(todouble(PhysicalRows) / ObservedDurationSec, 2), real(null));
+    let RawRun                  = RawDroneEvents | where tostring(simulation.simulator_run_id) == p_RunId;
+    let PhysicalRows            = toscalar(RawRun | count);
+    let UniqueEventIds          = toscalar (RawRun | summarize by event_id | count);
+    let DroneSeen               = toscalar (RawRun | summarize by drone_id | count);
+    let TimeStats               = RawRun | summarize FirstEhTime = min(eh_enqueued_time), LastEhTime = max(eh_enqueued_time);
+    let FirstEhTime             = toscalar (TimeStats | project FirstEhTime);
+    let LastEhTime              = toscalar (TimeStats  | project LastEhTime);
+    let ObservedDurationSec     = todouble(datetime_diff("millisecond", LastEhTime, FirstEhTime)) / 1000.0;
+    let AvgIngressEventsPerSec  = iif(ObservedDurationSec  > 0, round(todouble(PhysicalRows) / ObservedDurationSec, 2), real(null));
     print 
         RunId = p_RunId,
         DroneSeen = DroneSeen, 
@@ -22,4 +22,95 @@ ScaleValidationReport(p_RunId:string) {
         LastEhTime = LastEhTime,
         ObservedDurationSec = ObservedDurationSec,
         AvgIngressEventPerSec = AvgIngressEventsPerSec
+}
+
+.create-or-alter function
+with (
+    folder = "Silver/Performance",
+    docstring = "Measures relative delivery delay, cloud ingestion latency, physical arrival gaps, and burst behavior for a simulator run",
+    skipvalidation = "true"
+)
+StreamTimelinessReport(p_RunId:string) {
+    let RawRun = RawDroneEvents | where tostring(simulation.simulator_run_id) == p_RunId | extend BronzeIngestedAt = ingestion_time();
+    let BaseLine = RawRun | summarize FirstEventTime = min(event_time), FirstEhTime = min(eh_enqueued_time) by drone_id;
+    let TimedRun =
+        RawRun
+        | join kind = inner BaseLine on drone_id
+        | extend
+            SourceElapsedMs = datetime_diff("millisecond", event_time, FirstEventTime),
+            EhElapsedMs     = datetime_diff("millisecond", eh_enqueued_time, FirstEhTime)
+        | extend
+            RelativeDelayMs = EhElapsedMs - SourceElapsedMs,
+            CloudLatencyMs  = datetime_diff("millisecond", BronzeIngestedAt, eh_enqueued_time);
+    let DelayStats =
+        TimedRun
+        | summarize
+            Events = count(),
+            P50RelativeDelayMs  = percentile(RelativeDelayMs, 50),
+            P95RelativeDelayMs  = percentile(RelativeDelayMs, 95),
+            P99RelativeDelayMs  = percentile(RelativeDelayMs, 99),
+            MaxRelativeDelayMs  = max(RelativeDelayMs),
+            P50CloudLatencyMs   = percentile(CloudLatencyMs, 50),
+            P95CloudLatencyMs   = percentile(CloudLatencyMs, 95),
+            P99CloudLatencyMs   = percentile(CloudLatencyMs, 99),
+            MaxCloudLatencyMs   = max(CloudLatencyMs);
+    let PhysicalGaps =
+        RawRun
+        | sort by drone_id asc, eh_sequence_number asc
+        | serialize
+        | extend
+            PrevDrone = prev(drone_id),
+            PrevEhTime = prev(eh_enqueued_time)
+        | where drone_id == PrevDrone
+        | extend PhysicalGapMs = datetime_diff("millisecond", eh_enqueued_time, PrevEhTime);
+    let MaxPhysicalGapMs =toscalar(PhysicalGaps | summarize max(PhysicalGapMs));
+    let BurstStats =
+        RawRun
+        | summarize
+            BurstEvents = count(),
+            FirstSourceSeq = min(source_sequence_number),
+            LastSourceSeq = max(source_sequence_number)
+          by
+            drone_id,
+            EhSecond = bin(eh_enqueued_time, 1s)
+        | top 1 by BurstEvents desc;
+    let MaxBurstEvents = toscalar(BurstStats | project BurstEvents);
+    let BurstDrone = toscalar(BurstStats | project drone_id);
+    let BurstFirstSeq = toscalar(BurstStats | project FirstSourceSeq);
+    let BurstLastSeq = toscalar(BurstStats | project LastSourceSeq);
+    DelayStats
+    | extend
+        RunId = p_RunId,
+        MaxPhysicalGapMs = MaxPhysicalGapMs,
+        MaxBurstEvents = MaxBurstEvents,
+        BurstDrone = BurstDrone,
+        BurstFirstSeq = BurstFirstSeq,
+        BurstLastSeq = BurstLastSeq
+    | project
+        RunId,
+        Events,
+        P50RelativeDelayMs,
+        P95RelativeDelayMs,
+        P99RelativeDelayMs,
+        MaxRelativeDelayMs,
+        MaxPhysicalGapMs,
+        MaxBurstEvents,
+        BurstDrone,
+        BurstFirstSeq,
+        BurstLastSeq,
+        P50CloudLatencyMs,
+        P95CloudLatencyMs,
+        P99CloudLatencyMs,
+        MaxCloudLatencyMs
+}
+
+.create-or-alter function
+with (
+    folder = "Silver/Performance",
+    docstring = "Timeliness report for the most recently observed simulator run",
+    skipvalidation = "true"
+)
+CurrentStreamTimelinessReport() {
+    let RunId = toscalar(LatestObservedRun() | project RunId);
+    StreamTimelinessReport(RunId)
 }
