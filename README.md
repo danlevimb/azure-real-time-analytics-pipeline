@@ -343,6 +343,23 @@ Additional project-boundary documentation:
 
 ---
 
+## Cost & Azure cleanup
+
+The project completed its Azure resource cleanup after evidence capture.
+
+Final closeout state:
+
+- Event Hubs namespace: deleted;
+- analytical workspace: deleted after validation;
+- project resource group: removed;
+- intentionally retained live Azure resources: none.
+
+The repository, sanitized dashboard export, KQL, contracts, diagrams, and evidence preserve the portfolio value without requiring ongoing cloud spend.
+
+See [Project Closeout Checklist](docs/project_closeout_checklist.md) for the detailed cleanup and cost-review record.
+
+---
+
 ## Project Boundaries
 
 This is a portfolio-scale Azure Data Engineering MVP.
@@ -389,6 +406,6 @@ Azure Event Hubs transports the stream, KQL transforms and validates it, Gold fu
 
 ---
 
-## Author
+## Status
 
-Me 🙃
+**Completed / portfolio-ready MVP closed.**
