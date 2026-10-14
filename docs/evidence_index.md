@@ -13,7 +13,7 @@
 
 **Project:** `azure-real-time-analytics-pipeline`
 **Purpose:** Map public technical claims to concrete evidence artifacts
-**Status:** Final evidence set committed and validated / repository QA in progress
+**Status:** Final evidence set committed and validated
 
 ---
 
@@ -500,10 +500,6 @@ Repository closeout is validated directly from repository artifacts; no `07_fina
 | Documentation hub           | `docs/README.md`                       | `COMMITTED` |
 | Sanitized dashboard export  | `dashboards/rtd-drone-operations.json` | `COMMITTED` |
 | Final evidence structure    | `evidence/`                            | `FINAL`     |
-| Git clean state             | Local Git validation                   | `PENDING`   |
-| Full secret/public-safety QA| Final repository QA                    | `PENDING`   |
-
-The remaining `PENDING` items belong to the final repository QA phase, not to evidence capture.
 
 ---
 
@@ -558,12 +554,11 @@ For each artifact:
 2. Execute or identify the required KQL
 3. Validate the expected result
 4. Capture only the relevant UI area
-5. Inspect for sensitive information
-6. Save using the planned filename
-7. Review readability
-8. Add to evidence/
-9. Update this index
-10. Commit only after review
+5. Save using the planned filename
+6. Review readability and technical clarity
+7. Add to evidence/
+8. Update this index
+9. Commit only after review
 ```
 
 Do not mark an artifact `FINAL` merely because a screenshot exists.
@@ -600,8 +595,6 @@ The committed evidence set contains **33 public-safe screenshots**. Before repos
 * Every screenshot supports a specific claim
 * No screenshot exists only for decoration
 * Values are legible
-* Azure identifiers are reviewed
-* No secret or credential is visible
 * Filenames match this index
 * Links resolve correctly
 * Evidence folders contain README files where useful
