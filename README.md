@@ -406,6 +406,25 @@ Azure Event Hubs transports the stream, KQL transforms and validates it, Gold fu
 
 ---
 
+## Portfolio capability map
+
+This repository is part of a broader engineering progression. Each project answers a different operational question:
+
+```text
+Event-Driven     → How do I ingest and validate events as they arrive?
+ADF              → How do I orchestrate repeatable incremental loads?
+Databricks       → How do I transform data and preserve history?
+Synapse          → How do I serve curated lake data through SQL?
+Production Ready → How do I secure, deploy, observe, and operate the platform?
+Real-Time        → How do I trust imperfect streams and reconstruct operational state?  ← this project
+Governance       → What does this data mean, who owns it, and where did it come from?
+
+Cross-cutting reliability foundation:
+SQL Recovery     → How do I prove recoverability before an incident?
+```
+
+Together, the projects show a progression from ingestion and orchestration to transformation, serving, production operations, real-time reliability, governance, and recoverability.
+
 ## Status
 
 **Completed / portfolio-ready MVP closed.**
